@@ -1,0 +1,6 @@
+parameters:
+  word_press_ibexa.default.url: true
+  word_press_ibexa.posts: []
+  word_press_ibexa.pages: []
+  word_press_ibexa.tags: []
+  word_press_ibexa.categories: []

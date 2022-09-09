@@ -1,0 +1,9 @@
+monolog:
+  channels: ['word_press_ibexa']
+  handlers:
+    word_press_ibexa:
+      type: rotating_file
+      path: '%kernel.logs_dir%/word_press_ibexa.log'
+      channels: [ "word_press_ibexa" ]
+      level: info
+      max_files: 10

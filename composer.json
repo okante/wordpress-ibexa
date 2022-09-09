@@ -1,0 +1,28 @@
+{
+    "name": "almaviacx/wordpress-ibexa",
+    "description": "Convert WordPress Posts to ibexa Contents",
+    "keywords": [
+        "ezcommerce",
+        "ibexa",
+    ],
+    "authors": [
+        {
+            "name": "Almaviacx",
+            "email": "dir.tech@novactive.com"
+        },
+        {
+            "name": "Ousmane KANTE",
+            "email": "ousmane.kante@almaviacx.com"
+        }
+    ],
+    "type": "ibexa-bundle",
+    "license": "MIT",
+    "require": {
+        "php": "^7.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Almaviacx\\Bundle\\Ibexa\\WordPress\\": "bundle/"
+        }
+    }
+}
