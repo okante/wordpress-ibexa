@@ -89,7 +89,7 @@ abstract class AbstractService
                 }
             }
 
-            $this->info->error('iteration:'. $page);
+            $this->logger->info('iteration:'. $page);
 
             $page++;
         }
