@@ -6,10 +6,14 @@ use DateTimeImmutable;
 use Exception;
 use Ibexa\Contracts\Core\Repository\Values\ValueObject;
 
+/**
+ * @property-read int $id
+ */
 abstract class WPObject extends ValueObject
 {
     protected static array $renderedAttributes = [];
     protected static array $dateAttributes = [];
+    protected int $id;
 
     public function __construct(array $properties = [])
     {

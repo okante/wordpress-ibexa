@@ -8,7 +8,6 @@ use DateTimeInterface;
 use Ibexa\Contracts\Core\Repository\Values\ValueObject;
 
 /**
- * @property-read int $id
  * @property-read int $count
  * @property-read string $description
  * @property-read string $link
@@ -18,7 +17,6 @@ use Ibexa\Contracts\Core\Repository\Values\ValueObject;
  */
 class Category extends WPObject
 {
-    protected int $id;
     protected int $count;
     protected string $description;
     protected string $link;
@@ -26,10 +24,10 @@ class Category extends WPObject
     protected string $slug;
     protected int $parent;
 
-    public function __construct(array $properties = [])
+    public function __construct(array $data = [])
     {
         $properties = [
-            'id' => (int)($data['date']?? 0),
+            'id' => (int)($data['id']?? 0),
             'count' => (int)($data['count']??0),
             'description' => (string)($data['description']??''),
             'link' => (string)($data['link']??''),

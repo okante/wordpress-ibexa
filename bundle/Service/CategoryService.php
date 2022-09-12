@@ -13,6 +13,7 @@ final class CategoryService extends AbstractService
 {
     public const ROOT = 'categories';
     public const SERVICE_URL = '/categories';
+    public const CACHE_SUFFIX = 'category';
 
     protected string $objectClass = Category::class;
     protected string $exceptionClass = CategoryNotFoundException::class;

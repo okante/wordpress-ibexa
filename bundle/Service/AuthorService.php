@@ -9,6 +9,7 @@ final class AuthorService extends AbstractService
 {
     public const ROOT = 'categories';
     public const SERVICE_URL = '/users';
+    public const CACHE_SUFFIX = 'author';
 
 
     protected string $objectClass = Author::class;

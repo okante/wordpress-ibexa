@@ -10,6 +10,7 @@ final class PostService extends AbstractService
 {
     public const ROOT = 'posts';
     public const SERVICE_URL = '/posts';
+    public const CACHE_SUFFIX = 'post';
     private CategoryService $categoryService;
     private AuthorService $authorService;
 
@@ -28,10 +29,11 @@ final class PostService extends AbstractService
         $this->authorService = $authorService;
         return $this;
     }
-    public function get(int $page = 1, array $options = [], ?int $perPage = null): array
+
+    public function get(int $page = 1, ?int $perPage = null, array $options = []): array
     {
         $posts = [];
-        $postsArray = parent::get($page, $options, $perPage);;
+        $postsArray = parent::get($page, $perPage, $options);
         try {
             foreach ($postsArray as $postArray) {
                 $categories = [];
@@ -57,15 +59,16 @@ final class PostService extends AbstractService
                 $postArray['author'] = $author;
 
                 try {
-
-                    $posts[] = $this->createObject($postArray);
-                    break;
+                    /** @var Post $post */
+                    $post = $this->createObject($postArray);
+                    if ($post !== null) {
+                        $this->logger->info($post->title);
+                    }
+                    $posts[] = $post;
                 } catch(\Exception $e) {
                     $this->logger->error(__METHOD__, ['postId' => $postId, 'e' => $e->getTraceAsString()]);
-                    break;
                 }
             }
-            dump($posts);
             return $posts;
         } catch (Exception $e) {
             $this->logger->error(__METHOD__, ['postId' => $page, 'perPage' => $perPage, 'options' => $options, 'e' => $e]);

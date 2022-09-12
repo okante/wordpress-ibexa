@@ -8,7 +8,6 @@ use DateTimeInterface;
 use Ibexa\Contracts\Core\Repository\Values\ValueObject;
 
 /**
- * @property-read int $id
  * @property-read string $name
  * @property-read string $url
  * @property-read string $description
@@ -19,7 +18,6 @@ use Ibexa\Contracts\Core\Repository\Values\ValueObject;
  */
 class Author extends WPObject
 {
-    protected int $id;
     protected string $name;
     protected string $url;
     protected string $description;

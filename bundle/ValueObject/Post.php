@@ -7,7 +7,6 @@ namespace Almaviacx\Bundle\Ibexa\WordPress\ValueObject;
 use DateTimeInterface;
 
 /**
- * @property-read int $id
  * @property-read DateTimeInterface $date
  * @property-read DateTimeInterface $date_gmt
  * @property-read string $guid
@@ -33,7 +32,6 @@ class Post extends WPObject
 {
     protected static array $renderedAttributes = ['guid', 'title', 'content'];
     protected static array $dateAttributes = ['date', 'date_gmt', 'modified', 'modified_gmt'];
-    protected int $id;
     protected DateTimeInterface $date;
     protected DateTimeInterface $date_gmt;
     protected string $guid;
