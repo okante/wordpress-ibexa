@@ -8,9 +8,10 @@ use Almaviacx\Bundle\Ibexa\WordPress\DependencyInjection\Configuration;
 use Almaviacx\Bundle\Ibexa\WordPress\Exceptions\Exception;
 use Almaviacx\Bundle\Ibexa\WordPress\ValueObject\Post;
 use Almaviacx\Bundle\Ibexa\WordPress\ValueObject\WPObject;
-use eZ\Publish\API\Repository\Values\Content\Content as ValueContent;
 use eZ\Publish\Core\MVC\ConfigResolverInterface;
 use eZ\Publish\Core\Repository\Values\ContentType\FieldDefinition;
+use Ibexa\Contracts\Core\Repository\Exceptions\ContentFieldValidationException;
+use Ibexa\Contracts\Core\Repository\Exceptions\ContentValidationException;
 use Ibexa\Contracts\Core\Repository\Exceptions\NotFoundException;
 use Ibexa\Contracts\Core\Repository\Exceptions\UnauthorizedException;
 use Ibexa\Contracts\Core\Repository\Repository;
@@ -76,16 +77,19 @@ abstract class AbstractService
             $postCount += count($posts);
             foreach ($posts as $post) {
                 /** @var Post $post */
-                $content = $this->createContent($post);
-                if ($content) {
-                    $this->logger->info('created => '.$content->getName());
+                try {
+                    $this->repository->sudo(function () use ($post) {
+                        $content = $this->createContent($post);
+                        if ($content) {
+                            $this->logger->info('created => ' . $content->getName() . '('.$content->id.')');
+                        }
+                    });
+                } catch (\Exception $exception) {
+                    $this->logger->error(__METHOD__, ['e' => $exception, 'post' => $post]);
                 }
-                break 2;
             }
 
-
-
-            $this->logger->error(__METHOD__, ['page' => $page, 'e' => count($posts), 'p' => $perPage]);
+            $this->info->error('iteration:'. $page);
 
             $page++;
         }
@@ -348,7 +352,7 @@ abstract class AbstractService
 
                 $contentDraft = $contentService->updateContent($contentDraft->versionInfo, $contentUpdateStruct);
 
-                return $contentDraft->publishVersion($contentDraft);
+                return $contentService->publishVersion($contentDraft->versionInfo);
 
 
             } catch (NotFoundException $exception) {
@@ -367,12 +371,13 @@ abstract class AbstractService
 
     private function prepareRichText($inputText): RichTextValue
     {
-
+        if($inputText === ''){
+            $inputText = '&nbsp;';
+        }
+        if (strip_tags($inputText) === $inputText) {
+            $inputText = "<p>{$inputText}</p>";
+        }
         if (extension_loaded('tidy')) {
-            if($inputText === ''){
-                $inputText = '<p>&nbsp;</p>';
-            }
-
             $tidyConfig = array(
                 'show-body-only' => true,
                 'output-xhtml'   => true,
@@ -382,87 +387,20 @@ abstract class AbstractService
 
             $inputText = str_replace(array("\r\n", "\r", "\n"), "", $inputText->root()->value);
         }
-        if (strip_tags($inputText) === $inputText) {
-            $inputText = "<ul><li>{$inputText}</li></ul>";
-        }
-
 
         $content = ['xml' => '<?xml version="1.0" encoding="UTF-8"?><section xmlns="http://ibexa.co/namespaces/ezpublish5/xhtml5/edit">'. $inputText . '</section>'];
-
-        //php bin/console wordpress:ibexa:import
         return $this->richTextType->fromHash($content);
 
     }
 
-/*
     private function updateContentStruct(ContentStruct $contentStruct, $fieldSettings)
     {
         foreach ($fieldSettings as $identifier => $fieldInfo) {
             $fieldValue = $fieldInfo['value'];
             if ($fieldInfo['type'] === 'ezrichtext') {
                 $fieldValue = $this->prepareRichText($fieldValue);
-
-                                if (trim($fieldValue) === '') {
-                                    $fieldValue = '<p>&nbsp;</p>';
-                                }                $fieldValue = <<<ATTRIBUTE
-                <?xml version="1.0" encoding="UTF-8"?>
-                <section xmlns:ezxhtml5="http://ibexa.co/namespaces/ezpublish5/xhtml5/edit"
-                    xmlns:ezxhtml="http://ibexa.co/xmlns/dxp/docbook/xhtml"
-                    xmlns:xlink="http://www.w3.org/1999/xlink"
-                    xmlns="http://docbook.org/ns/docbook">{$fieldValue}
-                </section>;
-                ATTRIBUTE;
-
             }
             $contentStruct->setField($identifier, $fieldValue);
         }
     }
-
-
-/*
-    protected function sync($content, int $parentLocationId, SymfonyStyle $io)
-    {
-        try{
-            $content  = $this->createUpdateContent(
-                'test_richtext',
-                $this->container->getParameter('hibu_blog_posts_container_location_id'),
-                $content
-            );
-        }catch  (Exception $exception){
-            throw new RuntimeException(__METHOD__, 400, $exception);
-        }
-
-        $io->note("Content {$content->id} synced. ({$content->contentInfo->name})");
-    }
-
-    public function createUpdateContent(
-        string $contentTypeIdentifier,
-        int $parentLocationId,
-        array $data,
-        string $lang = 'eng-US'
-    ): ?ValueContent {
-        try {
-            $contentService = $this->repository->getContentService();
-            $locationService = $this->repository->getLocationService();
-            $contentType = $this->repository->getContentTypeService()->loadContentTypeByIdentifier($contentTypeIdentifier);
-            $contentCreateStruct = $contentService->newContentCreateStruct($contentType, $lang);
-
-            foreach ($contentType->getFieldDefinitions() as $field) {
-
-                $contentCreateStruct->setField($fieldName, $data[$fieldName]);
-            }
-
-
-            $locationCreateStruct = $locationService->newLocationCreateStruct($parentLocationId);
-
-            $draft = $contentService->createContent($contentCreateStruct, [$locationCreateStruct]);
-            return $contentService->publishVersion($draft->versionInfo);
-
-        }catch (Exception $exception) {
-            throw new RuntimeException(__METHOD__, 401, $exception);
-        }
-
-        return null;
-    }
-*/
 }
