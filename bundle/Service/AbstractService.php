@@ -114,7 +114,7 @@ abstract class AbstractService
             $realKey = $this->getRealCacheKey($cacheKey);
             $cacheItem = $this->cachePool->getItem($realKey);
             if ($cacheItem->isHit()) {
-                $this->logger->info('['.__METHOD__.']found('.$cacheKey.','.$realKey.')');
+                $this->logger->debug('['.__METHOD__.']found('.$cacheKey.','.$realKey.')');
                 return $cacheItem->get();
             }
         } catch (\Exception $exception) {
@@ -133,13 +133,13 @@ abstract class AbstractService
         $realKey = $this->getRealCacheKey($cacheKey);
         $cacheItem = $this->cachePool->getItem($realKey);
         if ($cacheItem->isHit()) {
-            $this->logger->info('['.__METHOD__.']found('.$cacheKey.','.$realKey.')');
+            $this->logger->debug('['.__METHOD__.']found('.$cacheKey.','.$realKey.')');
             return $cacheItem->get();
         }
         $cacheItem->set($object);
         $cacheItem->tag($this->getCacheTags());
         $this->cachePool->save($cacheItem);
-        $this->logger->info('['.__METHOD__.']saved('.$cacheKey.','.$realKey.')');
+        $this->logger->debug('['.__METHOD__.']saved('.$cacheKey.','.$realKey.')');
         return null;
     }
 
@@ -300,7 +300,7 @@ abstract class AbstractService
         if ($force === false) {
             $data = $this->loadFromCache( (string) $id);
             if ($data !== null) {
-                $this->logger->info('['.__METHOD__.']found('.$data->id.')');
+                $this->logger->debug('['.__METHOD__.']found('.$data->id.')');
                 return $data;
             }
         }
