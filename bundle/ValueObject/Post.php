@@ -57,7 +57,7 @@ class Post extends WPObject
     public function __construct(array $data = [])
     {
         $properties = [
-            'id' => (int)($data['date']?? 0),
+            'id' => (int)($data['id']?? 0),
             'date' => $data['date']??null,
             'date_gmt' => $data['date_gmt']??null,
             'guid' => ($data['guid']??''),
