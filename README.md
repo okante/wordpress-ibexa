@@ -60,5 +60,8 @@ word_press_ibexa:
 ### import posts
 
 ```shell
-php bin/console wordpress:ibexa:import --siteaccess=marqueatlantic_fr
+php bin/console wordpress:ibexa:import:category-tree --siteaccess=marqueatlantic_fr
+php bin/console wordpress:ibexa:import:post --siteaccess=marqueatlantic_fr
+   
+      
 ```
