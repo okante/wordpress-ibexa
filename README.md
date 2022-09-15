@@ -7,7 +7,7 @@
 ```
 ### Require the bundle
 
-```shell
+```
 composer require "almaviacx/wordpress-ibexa:^1.0"
 ```
 
@@ -59,7 +59,7 @@ word_press_ibexa:
 
 ### import posts
 
-```shell
+```
 php bin/console wordpress:ibexa:import:category-tree --siteaccess=marqueatlantic_fr
 php bin/console wordpress:ibexa:import:post --siteaccess=marqueatlantic_fr
    
