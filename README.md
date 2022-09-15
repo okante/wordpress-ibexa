@@ -4,7 +4,6 @@
 ## Installation:
 ### Configure Packge Repository:
 
-```
 ### Require the bundle
 
 ```
