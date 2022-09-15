@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace Almaviacx\Bundle\Ibexa\WordPress\ValueObject;
 
-use DateTimeInterface;
-use Ibexa\Contracts\Core\Repository\Values\ValueObject;
-
 /**
  * @property-read string $name
  * @property-read string $url
@@ -39,5 +36,15 @@ class Author extends WPObject
             'metas' => (array)($data['metas']??[]),
         ];
         parent::__construct($properties);
+    }
+
+    public function getWPObjectTitle(): ?string
+    {
+        return $this->name;
+    }
+
+    function getWPObjectId(): ?int
+    {
+        return $this->id;
     }
 }

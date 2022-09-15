@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace Almaviacx\Bundle\Ibexa\WordPress\ValueObject;
 
-use DateTimeInterface;
-use Ibexa\Contracts\Core\Repository\Values\ValueObject;
-
 /**
  * @property-read int $count
  * @property-read string $description
@@ -36,5 +33,15 @@ class Category extends WPObject
             'parent' => (int)($data['parent']??0),
         ];
         parent::__construct($properties);
+    }
+
+    public function getWPObjectTitle(): ?string
+    {
+        return $this->name;
+    }
+
+    public function getWPObjectId(): ?int
+    {
+        return $this->id;
     }
 }

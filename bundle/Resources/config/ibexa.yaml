@@ -1,0 +1,7 @@
+orm:
+  entity_mappings:
+    WordPressIbexaBundle:
+      is_bundle: true
+      type: annotation
+      dir: Entity
+      prefix: Almaviacx\Bundle\Ibexa\WordPress\Entity

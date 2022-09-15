@@ -2,15 +2,24 @@
 
 namespace Almaviacx\Bundle\Ibexa\WordPress\Service;
 
-use Almaviacx\Bundle\Ibexa\WordPress\Exceptions\Exception;
 use Almaviacx\Bundle\Ibexa\WordPress\Exceptions\PostNotFoundException;
 use Almaviacx\Bundle\Ibexa\WordPress\ValueObject\Post;
+use Almaviacx\Bundle\Ibexa\WordPress\ValueObject\WPObject;
+use Exception;
+use Ibexa\Contracts\Core\Repository\Exceptions\BadStateException;
+use Ibexa\Contracts\Core\Repository\Exceptions\ContentFieldValidationException;
+use Ibexa\Contracts\Core\Repository\Exceptions\ContentValidationException;
+use Ibexa\Contracts\Core\Repository\Exceptions\NotFoundException;
+use Ibexa\Contracts\Core\Repository\Exceptions\UnauthorizedException;
+use Ibexa\Contracts\Core\Repository\Values\Content\Content;
+use Psr\Cache\CacheException;
+use Psr\Cache\InvalidArgumentException;
 
 final class PostService extends AbstractService
 {
     public const ROOT = 'posts';
     public const SERVICE_URL = '/posts';
-    public const CACHE_SUFFIX = 'post';
+    public const DATATYPE = 'post';
     private CategoryService $categoryService;
     private AuthorService $authorService;
 
@@ -21,58 +30,63 @@ final class PostService extends AbstractService
     /**
      * @required
      * @param CategoryService $categoryService
+     * @param AuthorService $authorService
      * @return $this
      */
-    public function setServices(CategoryService $categoryService, AuthorService $authorService): PostService
+    public function setRelatedServices(CategoryService $categoryService, AuthorService $authorService): PostService
     {
         $this->categoryService = $categoryService;
         $this->authorService = $authorService;
         return $this;
     }
 
-    public function get(int $page = 1, ?int $perPage = null, array $options = []): array
+    protected function createObject(array $data): ?WPObject
     {
-        $posts = [];
-        $postsArray = parent::get($page, $perPage, $options);
-        try {
-            foreach ($postsArray as $postArray) {
-                $categories = [];
-                $postId = $postArray['id'];
-                foreach ($postArray['categories'] as $category) {
-                    try {
-                        $categories[] = $this->categoryService->getOne((int)$category);
-                    } catch(\Exception $e) {
-                        $this->logger->error(__METHOD__, ['category' => $category, 'postId' => $postId, 'e' => $e->getTraceAsString()]);
-                    }
-                }
-                $postArray['categories'] = $categories;
+        $data['categoryIds'] = (array)($data['categories']?? []);
+        $data['authorId'] = (int) ($data['author']?? null);
+        unset($data['author'], $data['categories']);
+        return parent::createObject($data);
+    }
 
-                $authorId =  (int) ($postArray['author']?? null);
-                $author = null;
-                if ($authorId) {
-                    try {
-                        $author = $this->authorService->getOne((int)$authorId);
-                    } catch(\Exception $e) {
-                        $this->logger->error(__METHOD__, ['authorId' => $authorId, 'postId' => $postId, 'e' => $e->getTraceAsString()]);
-                    }
-                }
-                $postArray['author'] = $author;
+    /**
+     * @param WPObject $object
+     * @param $lang
+     * @param bool $update
+     * @return Content|null
+     * @throws BadStateException
+     * @throws ContentFieldValidationException
+     * @throws ContentValidationException
+     * @throws NotFoundException
+     * @throws UnauthorizedException
+     * @throws \Ibexa\Contracts\Core\Repository\Exceptions\InvalidArgumentException
+     */
+    public function  createContent(WPObject $object, $lang = 'eng-GB', bool $update = true): ?Content
+    {
+        if ($object instanceof Post) {
+            $postId = $object->getWPObjectId();
+            $remoteId = self::DATATYPE. '-'. $postId;
+            $values = $this->configResolver->getParameter(self::ROOT, self::NAMESPACE);
+            $parentLocationId = $values['parent_location']??null;
 
+            $authorId = $object->authorId;
+            if (!empty($authorId)) {
                 try {
-                    /** @var Post $post */
-                    $post = $this->createObject($postArray);
-                    if ($post !== null) {
-                        $this->logger->info($post->title);
-                    }
-                    $posts[] = $post;
-                } catch(\Exception $e) {
-                    $this->logger->error(__METHOD__, ['postId' => $postId, 'e' => $e->getTraceAsString()]);
+                    $object->setAuthorContent($this->authorService->createAsSubObject($authorId)->contentInfo);
+                } catch(Exception $e) {
+                    $this->error(__METHOD__, ['authorId' => $authorId, 'postId' => $postId, 'e' => $e->getTraceAsString()]);
                 }
             }
-            return $posts;
-        } catch (Exception $e) {
-            $this->logger->error(__METHOD__, ['postId' => $page, 'perPage' => $perPage, 'options' => $options, 'e' => $e]);
-            return [];
+            $categoryId = (int) (array_values($object->categoryIds)[0] ?? null);// array_shift(array_values($array));($object->categoryIds);
+            if (!empty($categoryId)) {
+                try {
+                    $parentLocationId = $this->categoryService->createAsSubObject($categoryId)->contentInfo->mainLocationId;
+                } catch(Exception $e) {
+                    $this->error(__METHOD__, ['category' => $categoryId, 'postId' => $postId, 'e' => $e->getTraceAsString()]);
+                }
+            }
+            return $this->innerCreateContent($object, $values, $remoteId, $parentLocationId, $lang, $update);
         }
+        return null;
     }
+
 }

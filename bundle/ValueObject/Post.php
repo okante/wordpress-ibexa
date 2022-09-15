@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Almaviacx\Bundle\Ibexa\WordPress\ValueObject;
 
 use DateTimeInterface;
+use Ibexa\Contracts\Core\Repository\Values\Content\ContentInfo;
 
 /**
  * @property-read DateTimeInterface $date
@@ -25,8 +26,11 @@ use DateTimeInterface;
  * @property-read string $format
  * @property-read array $metas
  * @property-read Category[] $categories
+ * @property-read array $categoryIds
  * @property-read array $tags
+ * @property-read ?int $authorId
  * @property-read Author $author
+ * @property-read ContentInfo $authorContentInfo
  */
 class Post extends WPObject
 {
@@ -51,8 +55,11 @@ class Post extends WPObject
     protected string $format;
     protected array $metas = [];
     protected array $categories = [];
+    protected array $categoryIds = [];
     protected array $tags = [];
-    protected Author $author;
+    protected ?int $authorId;
+    protected ?Author $author;
+    protected ?ContentInfo $authorContentInfo;
 
     public function __construct(array $data = [])
     {
@@ -77,9 +84,27 @@ class Post extends WPObject
             'format' => (string)($data['format']??''),
             'metas' => (array)($data['metas']??[]),
             'categories' => (array)($data['categories']??[]),
+            'categoryIds' => (array)($data['categoryIds']??[]),
             'tags' => (array)($data['tags']??[]),
+            'authorId' => (int)($data['authorId']??null),
             'author' => ($data['author']??null),
+            'authorContentInfo' => ($data['authorContentInfo']??null),
         ];
         parent::__construct($properties);
+    }
+
+    public function getWPObjectTitle(): ?string
+    {
+       return $this->title;
+    }
+
+    public function getWPObjectId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function setAuthorContent(ContentInfo $authorContentInfo)
+    {
+        $this->authorContentInfo = $authorContentInfo;
     }
 }

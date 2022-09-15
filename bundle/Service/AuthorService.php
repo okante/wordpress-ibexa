@@ -7,9 +7,9 @@ use Almaviacx\Bundle\Ibexa\WordPress\ValueObject\Author;
 
 final class AuthorService extends AbstractService
 {
-    public const ROOT = 'categories';
+    public const ROOT = 'users';
     public const SERVICE_URL = '/users';
-    public const CACHE_SUFFIX = 'author';
+    public const DATATYPE = 'author';
 
 
     protected string $objectClass = Author::class;

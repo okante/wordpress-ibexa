@@ -2,7 +2,7 @@
 
 namespace Almaviacx\Bundle\Ibexa\WordPress\ValueObject;
 
-use DateTimeImmutable;
+use DateTime;
 use Exception;
 use Ibexa\Contracts\Core\Repository\Values\ValueObject;
 
@@ -26,13 +26,23 @@ abstract class WPObject extends ValueObject
         foreach (static::$dateAttributes as $property) {
             if (isset($properties[$property])) {
                 try {
-                    $value = new DateTimeImmutable($properties[$property]?? null);
+                    $value = new DateTime($properties[$property]?? null);
                 } catch (Exception $exception) {
-                    $value = new DateTimeImmutable();
+                    $value = new DateTime();
                 }
                 $properties[$property] = $value;
             }
         }
         parent::__construct($properties);
+    }
+    abstract function getWPObjectTitle() : ?string;
+    abstract public function getWPObjectId(): ?int;
+    public function toArray(): array
+    {
+        $array = [];
+        foreach ($this->getProperties() as $property =>$propertyValue) {
+            $array[$property] = $propertyValue;
+        }
+        return $array;
     }
 }

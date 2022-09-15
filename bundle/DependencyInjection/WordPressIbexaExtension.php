@@ -8,10 +8,12 @@ use Exception;
 use Ibexa\Bundle\Core\DependencyInjection\Configuration\SiteAccessAware\ConfigurationProcessor;
 use Ibexa\Bundle\Core\DependencyInjection\Configuration\SiteAccessAware\ContextualizerInterface;
 use Symfony\Component\Config\FileLocator;
+use Symfony\Component\Config\Resource\FileResource;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
+use Symfony\Component\Yaml\Yaml;
 
 class WordPressIbexaExtension extends Extension implements PrependExtensionInterface
 {
@@ -29,27 +31,15 @@ class WordPressIbexaExtension extends Extension implements PrependExtensionInter
         $processor     = new ConfigurationProcessor($container, Configuration::NAMESPACE);
         $processor->mapSetting('url', $config);
         $processor->mapConfigArray('posts', $config/*, ContextualizerInterface::MERGE_FROM_SECOND_LEVEL*/);
+        $processor->mapConfigArray('users', $config/*, ContextualizerInterface::MERGE_FROM_SECOND_LEVEL*/);
         $processor->mapConfigArray('pages', $config/*, ContextualizerInterface::MERGE_FROM_SECOND_LEVEL*/);
         $processor->mapConfigArray('categories', $config/*, ContextualizerInterface::MERGE_FROM_SECOND_LEVEL*/);
         $processor->mapConfigArray('tags', $config/*, ContextualizerInterface::MERGE_FROM_SECOND_LEVEL*/);
-        /*
-        $processor->mapConfig(
-            $config,
-            function ($scopeSettings, $currentScope, ContextualizerInterface $contextualizer) {
-                $contextualizer->setContextualParameter('url', $currentScope, $scopeSettings['url']);
-                $contextualizer->setContextualParameter('posts', $currentScope, $scopeSettings['posts']);
-                $contextualizer->setContextualParameter('pages', $currentScope, $scopeSettings['pages']);
-                $contextualizer->setContextualParameter('categories', $currentScope, $scopeSettings['categories']);
-                $contextualizer->setContextualParameter('tags', $currentScope, $scopeSettings['tags']);
-                //$contextualizer->mapConfigArray('posts', $scopeSettings['posts'], ContextualizerInterface::MERGE_FROM_SECOND_LEVEL);
-                $contextualizer->mapConfigArray('categories', $scopeSettings['categories'], ContextualizerInterface::MERGE_FROM_SECOND_LEVEL);
-                $contextualizer->mapConfigArray('tags', $scopeSettings['tags'], ContextualizerInterface::MERGE_FROM_SECOND_LEVEL);
-            }
-        );
-        */
 
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.yaml');
+        //$config = Yaml::parse(file_get_contents(__DIR__ . '/../Resources/config/doctrine.yaml'));
+        //$container->prependExtensionConfig('doctrine', $config);
     }
 
     /**
@@ -61,5 +51,19 @@ class WordPressIbexaExtension extends Extension implements PrependExtensionInter
         $loader     = new Loader\YamlFileLoader($container, new FileLocator($configPath));
         $loader->load('default_settings.yaml');
         $loader->load('logger.yaml');
+
+        $this->prependExtension($container, __DIR__.'/../Resources/config/ibexa.yaml', 'ibexa');
+    }
+
+    private function prependExtension(ContainerBuilder $container, string $configFile, string $extensionName)
+    {
+        $config     = Yaml::parse(file_get_contents($configFile));
+        $container->prependExtensionConfig($extensionName, $config);
+    }
+
+    private function prependIbexa(ContainerBuilder $container): void
+    {
+        $config = Yaml::parse(file_get_contents(__DIR__ . '/../Resources/config/ibexa.yaml'));
+        $container->prependExtensionConfig('ibexa', $config);
     }
 }

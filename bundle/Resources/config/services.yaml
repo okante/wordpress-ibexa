@@ -14,3 +14,24 @@ services:
     Almaviacx\Bundle\Ibexa\WordPress\Command\:
         resource: '../../Command'
         lazy: true
+
+    Almaviacx\Bundle\Ibexa\WordPress\Repository\:
+        resource: '../../Repository'
+        lazy: true
+
+    Almaviacx\Bundle\Ibexa\WordPress\Service\StorageInterface: '@Almaviacx\Bundle\Ibexa\WordPress\Service\Storage\Redis'
+
+#
+#    wordpress.ibexa.import.category.command:
+#        class: Almaviacx\Bundle\Ibexa\WordPress\Command\ImportCommand
+#        lazy: true;
+#        arguments:
+#            $service: '@Almaviacx\Bundle\Ibexa\WordPress\Service\CategoryService'
+#            $name: 'wordpress:ibexa:import:category'
+#
+#    wordpress.ibexa.import.post.command:
+#        class: Almaviacx\Bundle\Ibexa\WordPress\Command\ImportCommand
+#        lazy: true;
+#        arguments:
+#            $service: '@Almaviacx\Bundle\Ibexa\WordPress\Service\PostService'
+#            $name: 'wordpress:ibexa:import:post'
