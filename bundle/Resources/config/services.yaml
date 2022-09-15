@@ -10,10 +10,10 @@ services:
     Almaviacx\Bundle\Ibexa\WordPress\Service\:
         resource: '../../Service'
 #        lazy: true
-
-    Almaviacx\Bundle\Ibexa\WordPress\Command\:
-        resource: '../../Command'
-        lazy: true
+#
+#    Almaviacx\Bundle\Ibexa\WordPress\Command\:
+#        resource: '../../Command'
+#        lazy: true
 
     Almaviacx\Bundle\Ibexa\WordPress\Repository\:
         resource: '../../Repository'
@@ -21,17 +21,18 @@ services:
 
     Almaviacx\Bundle\Ibexa\WordPress\Service\StorageInterface: '@Almaviacx\Bundle\Ibexa\WordPress\Service\Storage\Redis'
 
-#
-#    wordpress.ibexa.import.category.command:
-#        class: Almaviacx\Bundle\Ibexa\WordPress\Command\ImportCommand
-#        lazy: true;
-#        arguments:
-#            $service: '@Almaviacx\Bundle\Ibexa\WordPress\Service\CategoryService'
-#            $name: 'wordpress:ibexa:import:category'
-#
-#    wordpress.ibexa.import.post.command:
-#        class: Almaviacx\Bundle\Ibexa\WordPress\Command\ImportCommand
-#        lazy: true;
-#        arguments:
-#            $service: '@Almaviacx\Bundle\Ibexa\WordPress\Service\PostService'
-#            $name: 'wordpress:ibexa:import:post'
+    wordpress.ibexa.import.command.category:
+        class: Almaviacx\Bundle\Ibexa\WordPress\Command\ImportCommand
+        lazy: true
+        arguments:
+            $service: '@Almaviacx\Bundle\Ibexa\WordPress\Service\CategoryService'
+        tags:
+            - { name: console.command, command: 'wordpress:ibexa:import:category-tree'}
+
+    wordpress.ibexa.import.command.post:
+        class: Almaviacx\Bundle\Ibexa\WordPress\Command\ImportCommand
+        lazy: true
+        arguments:
+            $service: '@Almaviacx\Bundle\Ibexa\WordPress\Service\PostService'
+        tags:
+            - { name: console.command, command: 'wordpress:ibexa:import:post'}

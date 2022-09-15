@@ -1,32 +1,27 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Almaviacx\Bundle\Ibexa\WordPress\Command;
 
-use Almaviacx\Bundle\Ibexa\WordPress\Service\PostService;
+use Almaviacx\Bundle\Ibexa\WordPress\Service\ServiceInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-class ImportPostsCommand extends Command
+class ImportCommand extends Command
 {
-    private PostService $postService;
+    private ServiceInterface $service;
 
-    /**
-     * @required
-     */
-    public function setDependencies(PostService $postService)
+    public function __construct(ServiceInterface $service)
     {
-        $this->postService = $postService;
+        parent::__construct();
+        $this->service = $service;
     }
 
     protected function configure()
     {
         $this
-            ->setName('wordpress:ibexa:import:post')
             ->addOption(
                 'per-page',
                 null,
@@ -37,15 +32,9 @@ class ImportPostsCommand extends Command
                 'page',
                 null,
                 InputOption::VALUE_OPTIONAL,
-                'Page from'
+                'page'
             )
-            ->addOption(
-                'dry-run',
-                null,
-                InputOption::VALUE_NONE,
-                'Rolls back any database changes'
-            )
-            ->setDescription('Import Blog Posts from wordpress to ibexa content');
+            ->setDescription('Import Blog content to ibexa');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -55,10 +44,9 @@ class ImportPostsCommand extends Command
         $perPage = $perPage > 0? $perPage: null;
         $page = (int) ($input->getOption('page'));
         $page = $page > 0? $page: null;
-        $count = $this->postService->import($perPage, $page);
-        $io->info("Post imported => $count");
+        $count = $this->service->import($perPage, $page);
+        $io->info("content imported => $count");
         $io->success('Done');
         return Command::SUCCESS;
     }
 }
-//php bin/console w:i:im -vv
