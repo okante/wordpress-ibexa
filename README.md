@@ -8,7 +8,7 @@
 ### Require the bundle
 
 ```
-composer require "almaviacx/wordpress-ibexa:^1.0"
+composer require "almaviacx/wordpress-ibexa:dev-main"
 ```
 
 ### Enable the bundle
