@@ -36,3 +36,11 @@ services:
             $service: '@Almaviacx\Bundle\Ibexa\WordPress\Service\PostService'
         tags:
             - { name: console.command, command: 'wordpress:ibexa:import:post'}
+
+    wordpress.ibexa.import.command.page:
+        class: Almaviacx\Bundle\Ibexa\WordPress\Command\ImportCommand
+        lazy: true
+        arguments:
+            $service: '@Almaviacx\Bundle\Ibexa\WordPress\Service\PageService'
+        tags:
+            - { name: console.command, command: 'wordpress:ibexa:import:page'}

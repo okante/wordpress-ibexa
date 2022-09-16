@@ -95,7 +95,6 @@ abstract class AbstractService implements ServiceInterface
                 } catch (\Exception $exception) {
                     $this->error(__METHOD__, ['e' => $exception, 'object' => $object]);
                 }
-                break;
             }
             $this->info('iteration:'. $page);
             $page++;

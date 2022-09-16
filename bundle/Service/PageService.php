@@ -15,11 +15,11 @@ use Ibexa\Contracts\Core\Repository\Values\Content\Content;
 use Psr\Cache\CacheException;
 use Psr\Cache\InvalidArgumentException;
 
-final class PostService extends AbstractService
+final class PageService extends AbstractService
 {
-    public const ROOT = 'posts';
-    public const SERVICE_URL = '/posts';
-    public const DATATYPE = 'post';
+    public const ROOT = 'pages';
+    public const SERVICE_URL = '/pages';
+    public const DATATYPE = 'page';
     private CategoryService $categoryService;
     private AuthorService $authorService;
 
