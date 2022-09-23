@@ -21,5 +21,12 @@ interface ContentInterface
      * @throws UnauthorizedException
      * @throws NotFoundException
      */
-    public function createContent(WPObject $object, array $values, string $remoteId, int $parentLocationId = null, string $lang = 'eng-GB', bool $update = false): ?Content;
+    public function createContent(
+        WPObject $object,
+        array $values,
+        string $remoteId,
+        int $parentLocationId = null,
+        string $lang = 'eng-GB',
+        bool $update = false
+    ): ?Content;
 }

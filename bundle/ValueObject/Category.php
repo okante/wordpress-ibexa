@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Almaviacx\Bundle\Ibexa\WordPress\ValueObject;
 
 /**
- * @property-read int $count
- * @property-read string $description
- * @property-read string $link
- * @property-read string $name
- * @property-read string $slug
- * @property-read int $parent
+ * @property int    $count
+ * @property string $description
+ * @property string $link
+ * @property string $name
+ * @property string $slug
+ * @property int    $parent
  */
 class Category extends WPObject
 {
@@ -24,13 +24,13 @@ class Category extends WPObject
     public function __construct(array $data = [])
     {
         $properties = [
-            'id' => (int)($data['id']?? 0),
-            'count' => (int)($data['count']??0),
-            'description' => (string)($data['description']??''),
-            'link' => (string)($data['link']??''),
-            'name' => (string)($data['name']??''),
-            'slug' => (string)($data['slug']??''),
-            'parent' => (int)($data['parent']??0),
+            'id' => (int) ($data['id'] ?? 0),
+            'count' => (int) ($data['count'] ?? 0),
+            'description' => (string) ($data['description'] ?? ''),
+            'link' => (string) ($data['link'] ?? ''),
+            'name' => (string) ($data['name'] ?? ''),
+            'slug' => (string) ($data['slug'] ?? ''),
+            'parent' => (int) ($data['parent'] ?? 0),
         ];
         parent::__construct($properties);
     }

@@ -16,17 +16,19 @@ trait ConfigResolverTrait
     {
         $this->configResolver = $configResolver;
     }
+
     /**
      * @throws Exception
      */
     protected function getBaseURl(string $namespace): string
     {
         $baseUrl = (string) $this->configResolver->getParameter('url', $namespace);
-        $scheme = parse_url($baseUrl, PHP_URL_SCHEME);
-        $host = parse_url($baseUrl, PHP_URL_HOST);
+        $scheme  = parse_url($baseUrl, PHP_URL_SCHEME);
+        $host    = parse_url($baseUrl, PHP_URL_HOST);
         if (empty($scheme) || empty($host)) {
-            throw new Exception($baseUrl??'No base URL');
+            throw new Exception($baseUrl ?? 'No base URL');
         }
+
         return $baseUrl;
     }
 
@@ -36,12 +38,14 @@ trait ConfigResolverTrait
     public function getRequestedUrl(string $serviceURL, string $prefix, string $namespace): string
     {
         $baseUrl = $this->getBaseURl($namespace);
-        return trim($baseUrl, '/') . '/'. $prefix . '/' .trim($serviceURL, '/');
+
+        return trim($baseUrl, '/').'/'.$prefix.'/'.trim($serviceURL, '/');
     }
 
     private function getPerPage(string $root): int
     {
         $values = $this->configResolver->getParameter($root, self::NAMESPACE);
-        return (int)($values['per_page'] ?? null);
+
+        return (int) ($values['per_page'] ?? null);
     }
 }

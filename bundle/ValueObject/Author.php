@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Almaviacx\Bundle\Ibexa\WordPress\ValueObject;
 
 /**
- * @property-read string $name
- * @property-read string $url
- * @property-read string $description
- * @property-read string $link
- * @property-read string $slug
- * @property-read array $avatar_urls
- * @property-read array $metas
+ * @property string $name
+ * @property string $url
+ * @property string $description
+ * @property string $link
+ * @property string $slug
+ * @property array  $avatar_urls
+ * @property array  $metas
  */
 class Author extends WPObject
 {
@@ -26,14 +26,14 @@ class Author extends WPObject
     public function __construct(array $data = [])
     {
         $properties = [
-            'id' => $data['id']?? 0,
-            'name' => (string)($data['name']??''),
-            'url' => (string)($data['url']??''),
-            'description' => (string)($data['description']??''),
-            'link' => (string)($data['link']??''),
-            'slug' => (string)($data['slug']??''),
-            'avatar_urls' => (array)($data['avatar_urls']??[]),
-            'metas' => (array)($data['metas']??[]),
+            'id' => $data['id'] ?? 0,
+            'name' => (string) ($data['name'] ?? ''),
+            'url' => (string) ($data['url'] ?? ''),
+            'description' => (string) ($data['description'] ?? ''),
+            'link' => (string) ($data['link'] ?? ''),
+            'slug' => (string) ($data['slug'] ?? ''),
+            'avatar_urls' => (array) ($data['avatar_urls'] ?? []),
+            'metas' => (array) ($data['metas'] ?? []),
         ];
         parent::__construct($properties);
     }
@@ -43,7 +43,7 @@ class Author extends WPObject
         return $this->name;
     }
 
-    function getWPObjectId(): ?int
+    public function getWPObjectId(): ?int
     {
         return $this->id;
     }
