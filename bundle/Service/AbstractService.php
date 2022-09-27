@@ -99,7 +99,13 @@ abstract class AbstractService implements ServiceInterface
         $this->info('Total content:'.$postCount);
         $this->info('Imported content:'.$importedCount);
 
-        return new ArrayObject(['success' => $importedCount, 'total' => $postCount], ArrayObject::STD_PROP_LIST | ArrayObject::ARRAY_AS_PROPS);
+        return new ArrayObject(
+            [
+                'success' => $importedCount,
+                'total' => $postCount,
+            ],
+            ArrayObject::STD_PROP_LIST | ArrayObject::ARRAY_AS_PROPS
+        );
     }
 
     /**

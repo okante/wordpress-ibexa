@@ -57,15 +57,31 @@ abstract class PostAbstractService extends AbstractService
                 try {
                     $object->setAuthorContent($this->authorService->createAsSubObject($authorId)->contentInfo);
                 } catch (\Exception $e) {
-                    $this->error(__METHOD__, ['authorId' => $authorId, 'postId' => $postId, 'e' => $e->getTraceAsString()]);
+                    $this->error(
+                        __METHOD__,
+                        [
+                            'authorId' => $authorId,
+                            'postId' => $postId,
+                            'e' => $e->getTraceAsString(),
+                        ]
+                    );
                 }
             }
-            $categoryId = (int) (array_values($object->categoryIds)[0] ?? null); // array_shift(array_values($array));($object->categoryIds);
+            $categoryId = (int) (array_values($object->categoryIds)[0] ?? null);
             if (!empty($categoryId)) {
                 try {
-                    $parentLocationId = $this->categoryService->createAsSubObject($categoryId)->contentInfo->mainLocationId;
+                    $parentLocationId = $this->categoryService->createAsSubObject(
+                        $categoryId
+                    )->contentInfo->mainLocationId;
                 } catch (\Exception $e) {
-                    $this->error(__METHOD__, ['category' => $categoryId, 'postId' => $postId, 'e' => $e->getTraceAsString()]);
+                    $this->error(
+                        __METHOD__,
+                        [
+                            'category' => $categoryId,
+                            'postId' => $postId,
+                            'e' => $e->getTraceAsString(),
+                        ]
+                    );
                 }
             }
 
@@ -74,9 +90,17 @@ abstract class PostAbstractService extends AbstractService
                 try {
                     $object->setImageContent($this->imageService->createAsSubObject($featureMedia)->contentInfo);
                 } catch (\Exception $e) {
-                    $this->error(__METHOD__, ['authorId' => $authorId, 'postId' => $postId, 'e' => $e->getTraceAsString()]);
+                    $this->error(
+                        __METHOD__,
+                        [
+                            'authorId' => $authorId,
+                            'postId' => $postId,
+                            'e' => $e->getTraceAsString(),
+                        ]
+                    );
                 }
             }
+
             return $this->innerCreateContent($object, $values, $remoteId, $parentLocationId, $lang, $update);
         }
 
