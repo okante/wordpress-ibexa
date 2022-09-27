@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Almaviacx\Bundle\Ibexa\WordPress\Service;
 
-use Almaviacx\Bundle\Ibexa\WordPress\Exceptions\Exception;
 use Almaviacx\Bundle\Ibexa\WordPress\Exceptions\PostNotFoundException;
 use Almaviacx\Bundle\Ibexa\WordPress\ValueObject\Post;
 use Almaviacx\Bundle\Ibexa\WordPress\ValueObject\WPObject;
 use Ibexa\Contracts\Core\Repository\Exceptions\BadStateException;
 use Ibexa\Contracts\Core\Repository\Exceptions\ContentFieldValidationException;
 use Ibexa\Contracts\Core\Repository\Exceptions\ContentValidationException;
+use Ibexa\Contracts\Core\Repository\Exceptions\InvalidArgumentException;
 use Ibexa\Contracts\Core\Repository\Exceptions\NotFoundException;
 use Ibexa\Contracts\Core\Repository\Exceptions\UnauthorizedException;
 use Ibexa\Contracts\Core\Repository\Values\Content\Content;
@@ -46,16 +46,14 @@ abstract class PostAbstractService extends AbstractService
     }
 
     /**
-     * @param $lang
-     *
      * @throws BadStateException
      * @throws ContentFieldValidationException
      * @throws ContentValidationException
+     * @throws InvalidArgumentException
      * @throws NotFoundException
      * @throws UnauthorizedException
-     * @throws \Ibexa\Contracts\Core\Repository\Exceptions\InvalidArgumentException
      */
-    public function createContent(WPObject $object, $lang = 'eng-GB', bool $update = true): ?Content
+    public function createContent(WPObject $object, string $lang = 'eng-GB', bool $update = true): ?Content
     {
         if ($object instanceof Post) {
             $postId           = $object->getWPObjectId();
@@ -67,32 +65,16 @@ abstract class PostAbstractService extends AbstractService
             if (!empty($authorId)) {
                 try {
                     $object->setAuthorContent($this->authorService->createAsSubObject($authorId)->contentInfo);
-                } catch (Exception $e) {
-                    $this->error(
-                        __METHOD__,
-                        [
-                            'authorId' => $authorId,
-                            'postId' => $postId,
-                            'e' => $e->getTraceAsString(),
-                        ]
-                    );
+                } catch (\Exception $e) {
+                    $this->error(__METHOD__, ['authorId' => $authorId, 'postId' => $postId, 'e' => $e->getTraceAsString()]);
                 }
             }
-            $categoryId = (int) (array_values($object->categoryIds)[0] ?? null);
+            $categoryId = (int) (array_values($object->categoryIds)[0] ?? null); // array_shift(array_values($array));($object->categoryIds);
             if (!empty($categoryId)) {
                 try {
-                    $parentLocationId = $this->categoryService->createAsSubObject(
-                        $categoryId
-                    )->contentInfo->mainLocationId;
-                } catch (Exception $e) {
-                    $this->error(
-                        __METHOD__,
-                        [
-                            'category' => $categoryId,
-                            'postId' => $postId,
-                            'e' => $e->getTraceAsString(),
-                        ]
-                    );
+                    $parentLocationId = $this->categoryService->createAsSubObject($categoryId)->contentInfo->mainLocationId;
+                } catch (\Exception $e) {
+                    $this->error(__METHOD__, ['category' => $categoryId, 'postId' => $postId, 'e' => $e->getTraceAsString()]);
                 }
             }
 

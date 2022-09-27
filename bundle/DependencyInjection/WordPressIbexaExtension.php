@@ -34,6 +34,8 @@ class WordPressIbexaExtension extends Extension implements PrependExtensionInter
         $processor->mapConfigArray('pages', $config/* , ContextualizerInterface::MERGE_FROM_SECOND_LEVEL */);
         $processor->mapConfigArray('categories', $config/* , ContextualizerInterface::MERGE_FROM_SECOND_LEVEL */);
         $processor->mapConfigArray('tags', $config/* , ContextualizerInterface::MERGE_FROM_SECOND_LEVEL */);
+        $processor->mapConfigArray('image', $config/* , ContextualizerInterface::MERGE_FROM_SECOND_LEVEL */);
+        $processor->mapConfigArray('media', $config/* , ContextualizerInterface::MERGE_FROM_SECOND_LEVEL */);
 
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.yaml');

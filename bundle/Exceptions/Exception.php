@@ -11,12 +11,8 @@ class Exception extends BaseException
 {
     protected array $options = [];
 
-    public function __construct(
-        string $url = 'default-url',
-        array $options = [],
-        Throwable $previous = null,
-        int $code = 0
-    ) {
+    public function __construct(string $url = 'default-url', array $options = [], Throwable $previous = null, int $code = 0)
+    {
         $message = sprintf('Unable to load %s', $url);
         parent::__construct($message, $code, $previous);
         $this->options = $options;

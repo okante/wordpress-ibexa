@@ -7,10 +7,12 @@ namespace Almaviacx\Bundle\Ibexa\WordPress\Service;
 use Almaviacx\Bundle\Ibexa\WordPress\DependencyInjection\Configuration;
 use Almaviacx\Bundle\Ibexa\WordPress\Exceptions\Exception;
 use Almaviacx\Bundle\Ibexa\WordPress\Service\Traits\ConfigResolverTrait;
+use Almaviacx\Bundle\Ibexa\WordPress\Service\Traits\HttpClientTrait;
 use Almaviacx\Bundle\Ibexa\WordPress\Service\Traits\IbexaRepositoryTrait;
 use Almaviacx\Bundle\Ibexa\WordPress\Service\Traits\LoggerTrait;
 use Almaviacx\Bundle\Ibexa\WordPress\ValueObject\OrderBy;
 use Almaviacx\Bundle\Ibexa\WordPress\ValueObject\WPObject;
+use ArrayObject;
 use Ibexa\Contracts\Core\Repository\Exceptions\BadStateException;
 use Ibexa\Contracts\Core\Repository\Exceptions\ContentFieldValidationException;
 use Ibexa\Contracts\Core\Repository\Exceptions\ContentValidationException;
@@ -20,13 +22,13 @@ use Ibexa\Contracts\Core\Repository\Values\Content\Content;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Contracts\HttpClient\Exception\ExceptionInterface;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 abstract class AbstractService implements ServiceInterface
 {
     use ConfigResolverTrait;
     use LoggerTrait;
     use IbexaRepositoryTrait;
+    use HttpClientTrait;
 
     protected const NAMESPACE    = Configuration::NAMESPACE;
     private const SERVICE_PREFIX = 'wp-json/wp/v2';
@@ -35,18 +37,13 @@ abstract class AbstractService implements ServiceInterface
     public const SERVICE_URL = '';
     public const ROOT        = '';
 
-    protected HttpClientInterface $client;
     protected string $objectClass;
     protected string $exceptionClass;
     protected StorageInterface $storage;
     protected ContentInterface $contentInterface;
 
-    public function __construct(
-        HttpClientInterface $client,
-        StorageInterface $storage,
-        ContentInterface $contentInterface
-    ) {
-        $this->client           = $client;
+    public function __construct(StorageInterface $storage, ContentInterface $contentInterface)
+    {
         $this->storage          = $storage;
         $this->contentInterface = $contentInterface;
     }
@@ -73,12 +70,13 @@ abstract class AbstractService implements ServiceInterface
         return $wpObjectContent;
     }
 
-    final public function import(?int $perPage = null, ?int $page = null): int
+    final public function import(?int $perPage = null, ?int $page = null): ArrayObject
     {
         $this->storage->clearAll();
-        $perPage   = $perPage > 0 ? $perPage : null;
-        $page      = abs($page ?? 1);
-        $postCount = 0;
+        $perPage       = $perPage > 0 ? $perPage : null;
+        $page          = abs($page ?? 1);
+        $postCount     = 0;
+        $importedCount = 0;
         while (true) {
             $objects = $this->get($page, $perPage);
             if (0 === count($objects)) {
@@ -89,6 +87,7 @@ abstract class AbstractService implements ServiceInterface
                 /* @var WPObject $object */
                 try {
                     $this->createContent($object);
+                    ++$importedCount;
                 } catch (\Exception $exception) {
                     $this->error(__METHOD__, ['e' => $exception, 'object' => $object]);
                 }
@@ -97,8 +96,10 @@ abstract class AbstractService implements ServiceInterface
             ++$page;
         }
         $this->storage->clearAll();
+        $this->info('Total content:'.$postCount);
+        $this->info('Imported content:'.$importedCount);
 
-        return $postCount;
+        return new ArrayObject(['success' => $importedCount, 'total' => $postCount], ArrayObject::STD_PROP_LIST | ArrayObject::ARRAY_AS_PROPS);
     }
 
     /**

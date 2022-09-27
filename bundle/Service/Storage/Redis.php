@@ -62,14 +62,6 @@ class Redis implements StorageInterface
                 return $cacheItem->get();
             }
         } catch (\Exception $exception) {
-            $this->error(
-                __METHOD__,
-                [
-                    'dataId' => $dataId,
-                    'dataType' => $dataType,
-                    'e' => $exception,
-                ]
-            );
         }
 
         return null;

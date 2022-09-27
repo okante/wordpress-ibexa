@@ -45,7 +45,7 @@ class ImportCommand extends Command
         $page    = (int) $input->getOption('page');
         $page    = $page > 0 ? $page : null;
         $count   = $this->service->import($perPage, $page);
-        $io->info("content imported => $count");
+        $io->info('content imported => (success:'.($count->success ?? '').',total:'.($count->total ?? '').')');
         $io->success('Done');
 
         return Command::SUCCESS;
