@@ -7,7 +7,7 @@ use Exception;
 use Ibexa\Contracts\Core\Repository\Values\ValueObject;
 
 /**
- * @property int $id
+ * @property-read int $id
  */
 abstract class WPObject extends ValueObject
 {

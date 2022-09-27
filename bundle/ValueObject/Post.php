@@ -8,29 +8,30 @@ use DateTimeInterface;
 use Ibexa\Contracts\Core\Repository\Values\Content\ContentInfo;
 
 /**
- * @property DateTimeInterface $date
- * @property DateTimeInterface $date_gmt
- * @property string            $guid
- * @property DateTimeInterface $modified
- * @property DateTimeInterface $modified_gmt
- * @property string            $slug
- * @property string            $status
- * @property string            $type
- * @property string            $link
- * @property string            $title
- * @property string            $content
- * @property string            $featured_media
- * @property string            $comment_status
- * @property string            $ping_status
- * @property string            $template
- * @property string            $format
- * @property array             $metas
- * @property Category[]        $categories
- * @property array             $categoryIds
- * @property array             $tags
- * @property ?int              $authorId
- * @property Author            $author
- * @property ContentInfo       $authorContentInfo
+ * @property-read DateTimeInterface $date
+ * @property-read DateTimeInterface $date_gmt
+ * @property-read string $guid
+ * @property-read DateTimeInterface $modified
+ * @property-read DateTimeInterface $modified_gmt
+ * @property-read string $slug
+ * @property-read string $status
+ * @property-read string $type
+ * @property-read string $link
+ * @property-read string $title
+ * @property-read string $content
+ * @property-read string $featured_media
+ * @property-read string $comment_status
+ * @property-read string $ping_status
+ * @property-read string $template
+ * @property-read string $format
+ * @property-read array $metas
+ * @property-read Category[] $categories
+ * @property-read array $categoryIds
+ * @property-read array $tags
+ * @property-read ?int $authorId
+ * @property-read Author $author
+ * @property-read ContentInfo $authorContentInfo
+ * @property-read ContentInfo $imageContentInfo
  */
 class Post extends WPObject
 {
@@ -60,6 +61,7 @@ class Post extends WPObject
     protected ?int $authorId;
     protected ?Author $author;
     protected ?ContentInfo $authorContentInfo;
+    protected ?ContentInfo $imageContentInfo = null;
 
     public function __construct(array $data = [])
     {
@@ -106,5 +108,10 @@ class Post extends WPObject
     public function setAuthorContent(ContentInfo $authorContentInfo)
     {
         $this->authorContentInfo = $authorContentInfo;
+    }
+
+    public function setImageContent(ContentInfo $authorContentInfo)
+    {
+        $this->imageContentInfo = $authorContentInfo;
     }
 }

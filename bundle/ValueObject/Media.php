@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Almaviacx\Bundle\Ibexa\WordPress\ValueObject;
 
 /**
- * @property int    $id
- * @property string $source_url
+ * @property-read int $id
+ * @property-read string $source_url
  */
 class Media extends WPObject
 {

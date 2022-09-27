@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Almaviacx\Bundle\Ibexa\WordPress\ValueObject;
 
 /**
- * @property int    $count
- * @property string $description
- * @property string $link
- * @property string $name
- * @property string $slug
- * @property int    $parent
+ * @property-read int $count
+ * @property-read string $description
+ * @property-read string $link
+ * @property-read string $name
+ * @property-read string $slug
+ * @property-read int $parent
  */
 class Category extends WPObject
 {

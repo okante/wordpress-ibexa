@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace Almaviacx\Bundle\Ibexa\WordPress\Service;
 
 use Almaviacx\Bundle\Ibexa\WordPress\Exceptions\PostNotFoundException;
+use Almaviacx\Bundle\Ibexa\WordPress\Service\Traits\AuthorServiceAware;
+use Almaviacx\Bundle\Ibexa\WordPress\Service\Traits\CategoryServiceAware;
+use Almaviacx\Bundle\Ibexa\WordPress\Service\Traits\ImageServiceAware;
 use Almaviacx\Bundle\Ibexa\WordPress\ValueObject\Post;
 use Almaviacx\Bundle\Ibexa\WordPress\ValueObject\WPObject;
 use Ibexa\Contracts\Core\Repository\Exceptions\BadStateException;
@@ -17,24 +20,12 @@ use Ibexa\Contracts\Core\Repository\Values\Content\Content;
 
 abstract class PostAbstractService extends AbstractService
 {
-    private CategoryService $categoryService;
-    private AuthorService $authorService;
+    use CategoryServiceAware;
+    use AuthorServiceAware;
+    use ImageServiceAware;
 
-    protected string $objectClass    = Post::class;
+    protected string $objectClass = Post::class;
     protected string $exceptionClass = PostNotFoundException::class;
-
-    /**
-     * @required
-     *
-     * @return $this
-     */
-    public function setRelatedServices(CategoryService $categoryService, AuthorService $authorService): self
-    {
-        $this->categoryService = $categoryService;
-        $this->authorService   = $authorService;
-
-        return $this;
-    }
 
     protected function createObject(array $data): ?WPObject
     {
@@ -78,6 +69,14 @@ abstract class PostAbstractService extends AbstractService
                 }
             }
 
+            $featureMedia = (int)$object->featured_media;
+            if (!empty($featureMedia)) {
+                try {
+                    $object->setImageContent($this->imageService->createAsSubObject($featureMedia)->contentInfo);
+                } catch(\Exception $e) {
+                    $this->error(__METHOD__, ['authorId' => $authorId, 'postId' => $postId, 'e' => $e->getTraceAsString()]);
+                }
+            }
             return $this->innerCreateContent($object, $values, $remoteId, $parentLocationId, $lang, $update);
         }
 

@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Almaviacx\Bundle\Ibexa\WordPress\ValueObject;
 
 /**
- * @property string $name
- * @property string $url
- * @property string $description
- * @property string $link
- * @property string $slug
- * @property array  $avatar_urls
- * @property array  $metas
+ * @property-read string $name
+ * @property-read string $url
+ * @property-read string $description
+ * @property-read string $link
+ * @property-read string $slug
+ * @property-read array $avatar_urls
+ * @property-read array $metas
  */
 class Author extends WPObject
 {

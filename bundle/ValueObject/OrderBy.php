@@ -5,8 +5,8 @@ namespace Almaviacx\Bundle\Ibexa\WordPress\ValueObject;
 use Ibexa\Contracts\Core\Repository\Values\ValueObject;
 
 /**
- * @property int    $order
- * @property string $field
+ * @property-read int $order
+ * @property-read string $field
  */
 class OrderBy extends ValueObject
 {
