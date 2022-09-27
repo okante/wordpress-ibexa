@@ -6,7 +6,6 @@ use Almaviacx\Bundle\Ibexa\WordPress\Service\AuthorService;
 
 trait AuthorServiceAware
 {
-
     protected AuthorService $authorService;
 
     /**

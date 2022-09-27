@@ -6,7 +6,6 @@ use Almaviacx\Bundle\Ibexa\WordPress\Service\ImageService;
 
 trait ImageServiceAware
 {
-
     protected ImageService $imageService;
 
     /**

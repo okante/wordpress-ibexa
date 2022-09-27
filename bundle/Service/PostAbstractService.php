@@ -24,7 +24,7 @@ abstract class PostAbstractService extends AbstractService
     use AuthorServiceAware;
     use ImageServiceAware;
 
-    protected string $objectClass = Post::class;
+    protected string $objectClass    = Post::class;
     protected string $exceptionClass = PostNotFoundException::class;
 
     protected function createObject(array $data): ?WPObject
@@ -69,11 +69,11 @@ abstract class PostAbstractService extends AbstractService
                 }
             }
 
-            $featureMedia = (int)$object->featured_media;
+            $featureMedia = (int) $object->featured_media;
             if (!empty($featureMedia)) {
                 try {
                     $object->setImageContent($this->imageService->createAsSubObject($featureMedia)->contentInfo);
-                } catch(\Exception $e) {
+                } catch (\Exception $e) {
                     $this->error(__METHOD__, ['authorId' => $authorId, 'postId' => $postId, 'e' => $e->getTraceAsString()]);
                 }
             }

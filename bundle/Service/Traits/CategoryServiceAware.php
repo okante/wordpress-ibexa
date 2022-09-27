@@ -3,11 +3,9 @@
 namespace Almaviacx\Bundle\Ibexa\WordPress\Service\Traits;
 
 use Almaviacx\Bundle\Ibexa\WordPress\Service\CategoryService;
-use Almaviacx\Bundle\Ibexa\WordPress\Service\ImageService;
 
 trait CategoryServiceAware
 {
-
     protected CategoryService $categoryService;
 
     /**
