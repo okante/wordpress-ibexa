@@ -44,3 +44,11 @@ services:
             $service: '@Almaviacx\Bundle\Ibexa\WordPress\Service\PageService'
         tags:
             - { name: console.command, command: 'wordpress:ibexa:import:page'}
+
+    wordpress.ibexa.import.command.image:
+        class: Almaviacx\Bundle\Ibexa\WordPress\Command\ImportCommand
+        lazy: true
+        arguments:
+            $service: '@Almaviacx\Bundle\Ibexa\WordPress\Service\ImageService'
+        tags:
+            - { name: console.command, command: 'wordpress:ibexa:import:image'}

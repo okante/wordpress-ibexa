@@ -24,13 +24,15 @@ trait LoggerTrait
 
     private function log(string $message, array $context = [], string $level = LogLevel::DEBUG): void
     {
-        if ($this->getLogger() !== null) {
+        if (null !== $this->getLogger()) {
             if (in_array($level, [LogLevel::EMERGENCY, LogLevel::ALERT, LogLevel::CRITICAL, LogLevel::ERROR], true)) {
                 $this->getLogger()->error($message, $context);
+
                 return;
             }
             if (in_array($level, [LogLevel::WARNING, LogLevel::NOTICE, LogLevel::INFO], true)) {
                 $this->getLogger()->info($message, $context);
+
                 return;
             }
             $this->getLogger()->debug($message, $context);

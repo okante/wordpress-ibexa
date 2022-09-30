@@ -1,0 +1,112 @@
+#@IgnoreInspection BashAddShebang
+
+PHP="env php -d memory_limit=-1 "
+CURL="curl"
+SCRIPT=$(readlink -f "$0")
+BASEDIR=$(dirname "$SCRIPT")
+EZROOT="$BASEDIR/../ibexa"
+APP_FOLDER="${BASEDIR}/../"
+SFCONSOLE="bin/console"
+
+#-- Vars
+RESTORE=$(echo -en '\033[0m')
+RED=$(echo -en '\033[00;31m')
+GREEN=$(echo -en '\033[00;32m')
+YELLOW=$(echo -en '\033[00;33m')
+BLUE=$(echo -en '\033[00;34m')
+MAGENTA=$(echo -en '\033[00;35m')
+PURPLE=$(echo -en '\033[00;35m')
+CYAN=$(echo -en '\033[00;36m')
+LIGHTGRAY=$(echo -en '\033[00;37m')
+LRED=$(echo -en '\033[01;31m')
+LGREEN=$(echo -en '\033[01;32m')
+LYELLOW=$(echo -en '\033[01;33m')
+LBLUE=$(echo -en '\033[01;34m')
+LMAGENTA=$(echo -en '\033[01;35m')
+LPURPLE=$(echo -en '\033[01;35m')
+LCYAN=$(echo -en '\033[01;36m')
+WHITE=$(echo -en '\033[01;37m')
+BOLD=$(echo -en '\033[1m')
+
+#-- Functions
+
+f_startColor ()
+{
+    echo -en "$1"
+}
+
+f_resetColor ()
+{
+    echo -en "${RESTORE}"
+}
+
+echoInfo ()
+{
+    echo "${CYAN}[${RESTORE}${BOLD}*${CYAN}]${RESTORE}${CYAN}[${RESTORE}${BOLD}*${CYAN}]${RESTORE}${CYAN}[${RESTORE}${BOLD}*${CYAN}]${RESTORE} ${BOLD}${WHITE}$@${RESTORE} ${CYAN}[${RESTORE}${BOLD}*${CYAN}]${RESTORE}${CYAN}[${RESTORE}${BOLD}*${CYAN}]${RESTORE}${CYAN}[${RESTORE}${BOLD}*${CYAN}]${RESTORE}"
+}
+
+echoAction ()
+{
+    echo "${RED}[${LBLUE}ACTION${RESTORE}${RED}]${RESTORE} $@ ${RESTORE}"
+}
+
+echoSuccess ()
+{
+    echo "${LRED}[${BOLD}${LGREEN}OK${RESTORE}${LRED}]${RESTORE} $@ ${RESTORE}"
+}
+
+echoNothing ()
+{
+    echo "${LRED}[${BOLD}${LGREEN}-${RESTORE}${LRED}]${RESTORE} $@ ${RESTORE}"
+}
+
+echoTitle ()
+{
+    echo "${LYELLOW}~~~~~~~~~~~~~~~~~~~~~~~~~~~${RESTORE}"
+    echo "${BOLD}${LPURPLE}====${RESTORE} ${LYELLOW}$@${RESTORE} ${BOLD}${LPURPLE}====${RESTORE}"
+    echo "${LYELLOW}~~~~~~~~~~~~~~~~~~~~~~~~~~~${RESTORE}"
+}
+
+echoHelp ()
+{
+    echo "${BOLD}$1${RESTORE}: ${GREEN}$2${RESTORE}"
+}
+
+# Test Yes or Exit
+f_testyes ()
+{
+read -p "$* [yes] " rep
+if [ -n "$rep" ]; then
+    if [ "$rep" != "yes" ]; then
+        exit
+    fi
+fi
+}
+
+# Show a beautiful title
+f_title ()
+{
+    if [ -f app/Resources/greetings_start.md ]; then
+        cat app/Resources/greetings_start.md | sed "s/#TITLE#/$1/"
+    else
+        echo $1
+    fi
+}
+
+# Done.
+f_done ()
+{
+    echo "Done."
+#    if [ -f app/Resources/greetings_end.md ]; then
+#        cat app/Resources/greetings_end.md
+#    fi
+}
+
+f_release ()
+{
+    if [ "$1" == "prod" ]; then
+        COMP_ARGS=" --optimize-autoloader"
+    fi
+    SYMFONY_ENV=$1 composer install --no-interaction $COMP_ARGS
+}
+

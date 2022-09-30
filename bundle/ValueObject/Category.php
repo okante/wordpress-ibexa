@@ -24,13 +24,13 @@ class Category extends WPObject
     public function __construct(array $data = [])
     {
         $properties = [
-            'id' => (int)($data['id']?? 0),
-            'count' => (int)($data['count']??0),
-            'description' => (string)($data['description']??''),
-            'link' => (string)($data['link']??''),
-            'name' => (string)($data['name']??''),
-            'slug' => (string)($data['slug']??''),
-            'parent' => (int)($data['parent']??0),
+            'id' => (int) ($data['id'] ?? 0),
+            'count' => (int) ($data['count'] ?? 0),
+            'description' => (string) ($data['description'] ?? ''),
+            'link' => (string) ($data['link'] ?? ''),
+            'name' => (string) ($data['name'] ?? ''),
+            'slug' => (string) ($data['slug'] ?? ''),
+            'parent' => (int) ($data['parent'] ?? 0),
         ];
         parent::__construct($properties);
     }

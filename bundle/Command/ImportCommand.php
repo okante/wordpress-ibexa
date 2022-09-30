@@ -39,14 +39,15 @@ class ImportCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $io = new SymfonyStyle($input, $output);
-        $perPage = (int) ($input->getOption('per-page'));
-        $perPage = $perPage > 0? $perPage: null;
-        $page = (int) ($input->getOption('page'));
-        $page = $page > 0? $page: null;
-        $count = $this->service->import($perPage, $page);
-        $io->info("content imported => $count");
+        $io      = new SymfonyStyle($input, $output);
+        $perPage = (int) $input->getOption('per-page');
+        $perPage = $perPage > 0 ? $perPage : null;
+        $page    = (int) $input->getOption('page');
+        $page    = $page > 0 ? $page : null;
+        $count   = $this->service->import($perPage, $page);
+        $io->info('content imported => (success:'.($count->success ?? '').',total:'.($count->total ?? '').')');
         $io->success('Done');
+
         return Command::SUCCESS;
     }
 }

@@ -26,14 +26,14 @@ class Author extends WPObject
     public function __construct(array $data = [])
     {
         $properties = [
-            'id' => $data['id']?? 0,
-            'name' => (string)($data['name']??''),
-            'url' => (string)($data['url']??''),
-            'description' => (string)($data['description']??''),
-            'link' => (string)($data['link']??''),
-            'slug' => (string)($data['slug']??''),
-            'avatar_urls' => (array)($data['avatar_urls']??[]),
-            'metas' => (array)($data['metas']??[]),
+            'id' => $data['id'] ?? 0,
+            'name' => (string) ($data['name'] ?? ''),
+            'url' => (string) ($data['url'] ?? ''),
+            'description' => (string) ($data['description'] ?? ''),
+            'link' => (string) ($data['link'] ?? ''),
+            'slug' => (string) ($data['slug'] ?? ''),
+            'avatar_urls' => (array) ($data['avatar_urls'] ?? []),
+            'metas' => (array) ($data['metas'] ?? []),
         ];
         parent::__construct($properties);
     }
@@ -43,7 +43,7 @@ class Author extends WPObject
         return $this->name;
     }
 
-    function getWPObjectId(): ?int
+    public function getWPObjectId(): ?int
     {
         return $this->id;
     }

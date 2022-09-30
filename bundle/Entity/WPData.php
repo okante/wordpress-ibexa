@@ -22,7 +22,6 @@ class WPData
     public const DATATYPE_AUTHOR   = AuthorService::DATATYPE;
 
     /**
-     * @var int
      * @ORM\Id
      * @ORM\Column(name="`data_id`", type="integer", nullable=false))
      */
@@ -35,57 +34,37 @@ class WPData
     protected string $dataType;
 
     /**
-     * @var string
      * @ORM\Column(name="`data_content`", type="text")
      */
     protected string $dataContent;
 
-    /**
-     * @return int
-     */
     public function getDataId(): int
     {
         return $this->dataId;
     }
 
-    /**
-     * @param int $dataId
-     */
     public function setDataId(int $dataId): void
     {
         $this->dataId = $dataId;
     }
 
-    /**
-     * @return string
-     */
     public function getDataType(): string
     {
         return $this->dataType;
     }
 
-    /**
-     * @param string $dataType
-     */
     public function setDataType(string $dataType): void
     {
         $this->dataType = $dataType;
     }
 
-    /**
-     * @return string
-     */
     public function getDataContent(): string
     {
         return $this->dataContent;
     }
 
-    /**
-     * @param string $dataContent
-     */
     public function setDataContent(string $dataContent): void
     {
         $this->dataContent = $dataContent;
     }
-
 }

@@ -8,7 +8,6 @@ use Exception;
 use Ibexa\Bundle\Core\DependencyInjection\Configuration\SiteAccessAware\ConfigurationProcessor;
 use Ibexa\Bundle\Core\DependencyInjection\Configuration\SiteAccessAware\ContextualizerInterface;
 use Symfony\Component\Config\FileLocator;
-use Symfony\Component\Config\Resource\FileResource;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader;
@@ -30,16 +29,18 @@ class WordPressIbexaExtension extends Extension implements PrependExtensionInter
         $config        = $this->processConfiguration($configuration, $configs);
         $processor     = new ConfigurationProcessor($container, Configuration::NAMESPACE);
         $processor->mapSetting('url', $config);
-        $processor->mapConfigArray('posts', $config/*, ContextualizerInterface::MERGE_FROM_SECOND_LEVEL*/);
-        $processor->mapConfigArray('users', $config/*, ContextualizerInterface::MERGE_FROM_SECOND_LEVEL*/);
-        $processor->mapConfigArray('pages', $config/*, ContextualizerInterface::MERGE_FROM_SECOND_LEVEL*/);
-        $processor->mapConfigArray('categories', $config/*, ContextualizerInterface::MERGE_FROM_SECOND_LEVEL*/);
-        $processor->mapConfigArray('tags', $config/*, ContextualizerInterface::MERGE_FROM_SECOND_LEVEL*/);
+        $processor->mapConfigArray('posts', $config/* , ContextualizerInterface::MERGE_FROM_SECOND_LEVEL */);
+        $processor->mapConfigArray('users', $config/* , ContextualizerInterface::MERGE_FROM_SECOND_LEVEL */);
+        $processor->mapConfigArray('pages', $config/* , ContextualizerInterface::MERGE_FROM_SECOND_LEVEL */);
+        $processor->mapConfigArray('categories', $config/* , ContextualizerInterface::MERGE_FROM_SECOND_LEVEL */);
+        $processor->mapConfigArray('tags', $config/* , ContextualizerInterface::MERGE_FROM_SECOND_LEVEL */);
+        $processor->mapConfigArray('image', $config/* , ContextualizerInterface::MERGE_FROM_SECOND_LEVEL */);
+        $processor->mapConfigArray('media', $config/* , ContextualizerInterface::MERGE_FROM_SECOND_LEVEL */);
 
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.yaml');
-        //$config = Yaml::parse(file_get_contents(__DIR__ . '/../Resources/config/doctrine.yaml'));
-        //$container->prependExtensionConfig('doctrine', $config);
+        // $config = Yaml::parse(file_get_contents(__DIR__ . '/../Resources/config/doctrine.yaml'));
+        // $container->prependExtensionConfig('doctrine', $config);
     }
 
     /**
@@ -57,13 +58,13 @@ class WordPressIbexaExtension extends Extension implements PrependExtensionInter
 
     private function prependExtension(ContainerBuilder $container, string $configFile, string $extensionName)
     {
-        $config     = Yaml::parse(file_get_contents($configFile));
+        $config = Yaml::parse(file_get_contents($configFile));
         $container->prependExtensionConfig($extensionName, $config);
     }
 
     private function prependIbexa(ContainerBuilder $container): void
     {
-        $config = Yaml::parse(file_get_contents(__DIR__ . '/../Resources/config/ibexa.yaml'));
+        $config = Yaml::parse(file_get_contents(__DIR__.'/../Resources/config/ibexa.yaml'));
         $container->prependExtensionConfig('ibexa', $config);
     }
 }
