@@ -10,7 +10,7 @@ use Ibexa\Contracts\Core\Repository\Values\ValueObject;
  */
 class OrderBy extends ValueObject
 {
-    public const DIR_ASC = 'asc';
+    public const DIR_ASC  = 'asc';
     public const DIR_DESC = 'desc';
     protected ?string $dir;
     protected ?string $field;
@@ -30,10 +30,11 @@ class OrderBy extends ValueObject
         if (empty($this->orderBy)) {
             if (!empty($orderBy->field)) {
                 return ['orderby' => $orderBy->field,
-                    'order' => $orderBy->dir
+                    'order' => $orderBy->dir,
                 ];
             }
         }
+
         return [];
     }
 }

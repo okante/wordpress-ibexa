@@ -4,3 +4,5 @@ parameters:
   word_press_ibexa.pages: []
   word_press_ibexa.tags: []
   word_press_ibexa.categories: []
+  word_press_ibexa.image: []
+  word_press_ibexa.media: []

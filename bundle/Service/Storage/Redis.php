@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+
 namespace Almaviacx\Bundle\Ibexa\WordPress\Service\Storage;
 
 use Almaviacx\Bundle\Ibexa\WordPress\DependencyInjection\Configuration;
@@ -18,8 +19,10 @@ class Redis implements StorageInterface
 {
     use ConfigResolverTrait;
     use LoggerTrait;
+
     protected const NAMESPACE = Configuration::NAMESPACE;
     private TagAwareAdapterInterface $cachePool;
+
     public function __construct(TagAwareAdapterInterface $cachePool)
     {
         $this->cachePool = $cachePool;
@@ -32,7 +35,7 @@ class Redis implements StorageInterface
      */
     public function store(string $dataId, string $dataType, WPObject $object): bool
     {
-        $realKey = $this->getRealCacheKey($dataId, $dataType);
+        $realKey   = $this->getRealCacheKey($dataId, $dataType);
         $cacheItem = $this->cachePool->getItem($realKey);
         if ($cacheItem->isHit()) {
             return true;
@@ -46,21 +49,20 @@ class Redis implements StorageInterface
     }
 
     /**
-     * @param string $dataId
-     * @param string $dataType
-     * @return WPObject|null
      * @throws InvalidArgumentException
      */
     public function load(string $dataId, string $dataType): ?WPObject
     {
         try {
-            $realKey = $this->getRealCacheKey($dataId, $dataType);
+            $realKey   = $this->getRealCacheKey($dataId, $dataType);
             $cacheItem = $this->cachePool->getItem($realKey);
             if ($cacheItem->isHit()) {
                 $this->info('found', ['dataId' => $dataId, 'dataType' => $dataType]);
+
                 return $cacheItem->get();
             }
         } catch (\Exception $exception) {
+            return null;
         }
 
         return null;
@@ -75,13 +77,12 @@ class Redis implements StorageInterface
         $this->cachePool->invalidateTags($this->getCacheTags());
     }
 
-
     /**
      * @throws Exception
      */
     public function getCacheTags(): array
     {
-        return [$this->normalizedCacheKey(self::NAMESPACE.'-' . $this->getBaseURl(self::NAMESPACE))];
+        return [$this->normalizedCacheKey(self::NAMESPACE.'-'.$this->getBaseURl(self::NAMESPACE))];
     }
 
     /**
@@ -89,7 +90,9 @@ class Redis implements StorageInterface
      */
     private function getRealCacheKey(string $dataId, string $dataType): string
     {
-        return $this->normalizedCacheKey(self::NAMESPACE.'-' . $this->getBaseURl(self::NAMESPACE). '-'.$dataId . '-' . $dataType);
+        return $this->normalizedCacheKey(
+            self::NAMESPACE.'-'.$this->getBaseURl(self::NAMESPACE).'-'.$dataId.'-'.$dataType
+        );
     }
 
     private function normalizedCacheKey($cacheKey)
