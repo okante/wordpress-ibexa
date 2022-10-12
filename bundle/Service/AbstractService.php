@@ -22,8 +22,8 @@ use Ibexa\Contracts\Core\Repository\Exceptions\NotFoundException;
 use Ibexa\Contracts\Core\Repository\Exceptions\UnauthorizedException;
 use Ibexa\Contracts\Core\Repository\Values\Content\Content;
 use Ibexa\Core\IO\IOServiceInterface;
-use Symfony\Component\Filesystem\Filesystem;
 use RuntimeException;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Request;
@@ -56,8 +56,7 @@ abstract class AbstractService implements ServiceInterface
         ContentInterface $contentInterface,
         IOServiceInterface $IOService,
         Filesystem $filesystem
-    )
-    {
+    ) {
         $this->storage          = $storage;
         $this->contentInterface = $contentInterface;
         $this->IOService        = $IOService;
@@ -321,27 +320,28 @@ abstract class AbstractService implements ServiceInterface
 
     private function exportImages(array $contents): void
     {
-        $dateTime = new DateTime();
-        $folderName = 'exportimages_' . $dateTime->format('d-m-Y');
-        $folderPath = '/tmp/' . $folderName . '/';
+        $dateTime   = new DateTime();
+        $folderName = 'exportimages_'.$dateTime->format('d-m-Y');
+        $folderPath = '/tmp/'.$folderName.'/';
         /** @var Content $content */
         foreach ($contents as $content) {
             if ($content->getContentType()->identifier == static::DATATYPE) {
                 $imageContentId = $content->getFieldValue('media')->destinationContentId;
                 if ($imageContentId) {
                     $imageContent = $this->repository->getContentService()->loadContent($imageContentId);
-                    $imageValue = $imageContent->getFieldValue('image');
-                    $binaryFile = $this->IOService->loadBinaryFile($imageValue->id);
+                    $imageValue   = $imageContent->getFieldValue('image');
+                    $binaryFile   = $this->IOService->loadBinaryFile($imageValue->id);
                     if (!$this->filesystem->exists($folderPath)) {
                         $this->filesystem->mkdir($folderPath);
                     }
-                    $temporaryPath = $folderPath . $imageContent->contentInfo->remoteId .
-                        '__' . $imageContent->getName() .
-                        '.' . pathinfo($imageValue->fileName, PATHINFO_EXTENSION);
+                    $temporaryPath = $folderPath.$imageContent->contentInfo->remoteId.
+                        '__'.$imageContent->getName().
+                        '.'.pathinfo($imageValue->fileName, PATHINFO_EXTENSION);
                     $this->filesystem->copy(
-                        $this->configResolver->getParameter('webroot_dir', self::NAMESPACE) .
+                        $this->configResolver->getParameter('webroot_dir', self::NAMESPACE).
                         $binaryFile->uri,
-                        $temporaryPath);
+                        $temporaryPath
+                    );
                 }
             }
         }
@@ -351,9 +351,9 @@ abstract class AbstractService implements ServiceInterface
     private function zipDirectory($directory, $zipName): void
     {
         try {
-            $zip = new ZipArchive();
+            $zip    = new ZipArchive();
             $finder = new Finder();
-            if ($zip->open($zipName, \ZipArchive::CREATE) !== true) {
+            if (true !== $zip->open($zipName, \ZipArchive::CREATE)) {
                 throw new FileException('Zip file could not be created/opened.');
             }
             $finder->files()->in($directory);
@@ -363,7 +363,7 @@ abstract class AbstractService implements ServiceInterface
             if (!$zip->close()) {
                 throw new FileException('Zip file could not be closed.');
             }
-            $this->info('Zip ' . $zipName . ' created');
+            $this->info('Zip '.$zipName.' created');
         } catch (\Exception $exception) {
             $this->error(__METHOD__, ['e' => $exception]);
         }
