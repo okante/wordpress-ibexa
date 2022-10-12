@@ -15,6 +15,10 @@ services:
 #        resource: '../../Command'
 #        lazy: true
 
+    Almaviacx\Bundle\Ibexa\WordPress\EventSubscriber\:
+        resource: '../../EventSubscriber'
+        lazy: true
+
     Almaviacx\Bundle\Ibexa\WordPress\Repository\:
         resource: '../../Repository'
         lazy: true

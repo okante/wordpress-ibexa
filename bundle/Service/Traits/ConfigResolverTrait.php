@@ -48,4 +48,9 @@ trait ConfigResolverTrait
 
         return (int) ($values['per_page'] ?? null);
     }
+
+    public function getRootLocationId(): int
+    {
+        return (int) $this->configResolver->getParameter('content.tree_root.location_id');
+    }
 }

@@ -16,6 +16,7 @@ use ArrayObject;
 use Ibexa\Contracts\Core\Repository\Exceptions\BadStateException;
 use Ibexa\Contracts\Core\Repository\Exceptions\ContentFieldValidationException;
 use Ibexa\Contracts\Core\Repository\Exceptions\ContentValidationException;
+use Ibexa\Contracts\Core\Repository\Exceptions\InvalidArgumentException;
 use Ibexa\Contracts\Core\Repository\Exceptions\NotFoundException;
 use Ibexa\Contracts\Core\Repository\Exceptions\UnauthorizedException;
 use Ibexa\Contracts\Core\Repository\Values\Content\Content;
@@ -54,7 +55,7 @@ abstract class AbstractService implements ServiceInterface
      * @throws ContentValidationException
      * @throws NotFoundException
      * @throws UnauthorizedException
-     * @throws \Ibexa\Contracts\Core\Repository\Exceptions\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function createAsSubObject(int $objectId, string $lang = 'eng-GB', bool $update = true): Content
     {
@@ -119,7 +120,7 @@ abstract class AbstractService implements ServiceInterface
             self::NAMESPACE
         );
         if (null === $perPage) {
-            $perPage = max(1, $this->getPerPage(static::ROOT));
+            $perPage = max(1, $this->getConfigurationField('per_page'));
         }
         $this->getOrderBy($options);
         $headers                      = $options['headers'] ?? [];
@@ -225,19 +226,29 @@ abstract class AbstractService implements ServiceInterface
      * @throws ContentValidationException
      * @throws NotFoundException
      * @throws UnauthorizedException
-     * @throws \Ibexa\Contracts\Core\Repository\Exceptions\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function createContent(WPObject $object, string $lang = 'eng-GB', bool $update = false): ?Content
     {
-        $values           = $this->configResolver->getParameter(static::ROOT, self::NAMESPACE);
+        $values           = $this->getConfigurationValues();
         $remoteId         = static::DATATYPE.'-'.$object->getWPObjectId();
         $parentLocationId = $values['parent_location'] ?? null;
 
         return $this->innerCreateContent($object, $values, $remoteId, $parentLocationId, $lang, $update);
     }
 
+    public function getContentTypeIdentifier()
+    {
+        return $this->getConfigurationField('content_type');
+    }
+
+    public function getSlugFieldIdentifier()
+    {
+        return $this->getConfigurationField('slug_field');
+    }
+
     /**
-     * @throws \Ibexa\Contracts\Core\Repository\Exceptions\InvalidArgumentException
+     * @throws InvalidArgumentException
      * @throws NotFoundException
      * @throws BadStateException
      * @throws ContentValidationException
@@ -279,5 +290,17 @@ abstract class AbstractService implements ServiceInterface
             $options['order']   = $orderBy['order'];
         }
         $options = $orderBy + $options;
+    }
+
+    private function getConfigurationField(string $field)
+    {
+        $values = $this->getConfigurationValues();
+
+        return $values[$field] ?? null;
+    }
+
+    private function getConfigurationValues(): array
+    {
+        return (array) $this->configResolver->getParameter(static::ROOT, self::NAMESPACE);
     }
 }
