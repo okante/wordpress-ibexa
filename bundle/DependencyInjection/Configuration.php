@@ -45,6 +45,7 @@ class Configuration extends SAConfiguration
                         ->isRequired()->end()
                     ->integerNode('parent_location')->example(2)->defaultValue(2)->isRequired()->end()
                     ->scalarNode('per_page')->example(2)->defaultValue(10)->isRequired()->end()
+                    ->scalarNode('slug_field')->example(2)->defaultValue(10)->end()
                     ->arrayNode('mapping')
                         ->useAttributeAsKey('name')
                         ->defaultValue([])

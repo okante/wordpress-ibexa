@@ -16,6 +16,7 @@ use ArrayObject;
 use Ibexa\Contracts\Core\Repository\Exceptions\BadStateException;
 use Ibexa\Contracts\Core\Repository\Exceptions\ContentFieldValidationException;
 use Ibexa\Contracts\Core\Repository\Exceptions\ContentValidationException;
+use Ibexa\Contracts\Core\Repository\Exceptions\InvalidArgumentException;
 use Ibexa\Contracts\Core\Repository\Exceptions\NotFoundException;
 use Ibexa\Contracts\Core\Repository\Exceptions\UnauthorizedException;
 use Ibexa\Contracts\Core\Repository\Values\Content\Content;
@@ -54,7 +55,7 @@ abstract class AbstractService implements ServiceInterface
      * @throws ContentValidationException
      * @throws NotFoundException
      * @throws UnauthorizedException
-     * @throws \Ibexa\Contracts\Core\Repository\Exceptions\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function createAsSubObject(int $objectId, string $lang = 'eng-GB', bool $update = true): Content
     {
@@ -225,7 +226,7 @@ abstract class AbstractService implements ServiceInterface
      * @throws ContentValidationException
      * @throws NotFoundException
      * @throws UnauthorizedException
-     * @throws \Ibexa\Contracts\Core\Repository\Exceptions\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function createContent(WPObject $object, string $lang = 'eng-GB', bool $update = false): ?Content
     {
@@ -235,9 +236,18 @@ abstract class AbstractService implements ServiceInterface
 
         return $this->innerCreateContent($object, $values, $remoteId, $parentLocationId, $lang, $update);
     }
+    public function getContentTypeIdentifier()
+    {
+        return $this->getConfigurationField('content_type');
+    }
+
+    public function getSlugFieldIdentifier()
+    {
+        return $this->getConfigurationField('slug_field');
+    }
 
     /**
-     * @throws \Ibexa\Contracts\Core\Repository\Exceptions\InvalidArgumentException
+     * @throws InvalidArgumentException
      * @throws NotFoundException
      * @throws BadStateException
      * @throws ContentValidationException
@@ -280,4 +290,11 @@ abstract class AbstractService implements ServiceInterface
         }
         $options = $orderBy + $options;
     }
+
+    private function getConfigurationField(string $field)
+    {
+        $values           = $this->configResolver->getParameter(static::ROOT, self::NAMESPACE);
+        return $values[$field] ?? null;
+    }
+
 }
