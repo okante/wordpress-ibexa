@@ -18,48 +18,58 @@ class RedirectService
 
     public function __construct(PostService $postService, CategoryService $categoryService)
     {
-        $this->postService = $postService;
+        $this->postService     = $postService;
         $this->categoryService = $categoryService;
     }
 
     public function getIbexaLocationId(string $path, array $parameters = []): ?int
     {
-        $pathArray = array_filter(explode('/', trim($path)));//'category/marketing-tips';
-        $slug = end($pathArray);
-        $rootPath = reset($pathArray);
-        if (count($pathArray) >= 2 && $rootPath === 'blog' && !empty($slug)) {
+        $pathArray = array_filter(explode('/', trim($path))); // 'category/marketing-tips';
+        $slug      = end($pathArray);
+        $rootPath  = reset($pathArray);
+        if (count($pathArray) >= 2 && 'blog' === $rootPath && !empty($slug)) {
             try {
+                $categoryContentTypeIdentifier = $this->categoryService->getContentTypeIdentifier();
+                $productContentTypeIdentifier  = $this->postService->getContentTypeIdentifier();
+
+                $categorySlugField = $this->categoryService->getSlugFieldIdentifier();
+                $productSlugField  = $this->postService->getSlugFieldIdentifier();
+
                 $rootLocation = $this->repository->getLocationService()->loadLocation($this->getRootLocationId());
-                $criteria = [
+                $criteria     = [
                     new Criterion\Subtree($rootLocation->pathString),
                     new Criterion\LogicalOr(
                         [
                             new Criterion\LogicalAnd(
                                 [
-                                    new Criterion\ContentTypeIdentifier($this->categoryService->getContentTypeIdentifier()),
-                                    new Criterion\Field($this->categoryService->getSlugFieldIdentifier(), Criterion\Operator::EQ, $slug),
-                                ]),
+                                    new Criterion\ContentTypeIdentifier($categoryContentTypeIdentifier),
+                                    new Criterion\Field($categorySlugField, Criterion\Operator::EQ, $slug),
+                                ]
+                            ),
                             new Criterion\LogicalAnd([
-                                new Criterion\ContentTypeIdentifier($this->postService->getContentTypeIdentifier()),
-                                new Criterion\Field($this->postService->getSlugFieldIdentifier(), Criterion\Operator::EQ, $slug),
-                            ])
+                                new Criterion\ContentTypeIdentifier($productContentTypeIdentifier),
+                                new Criterion\Field($productSlugField, Criterion\Operator::EQ, $slug),
+                            ]),
                         ]
                     ),
-                    new Criterion\Visibility(Criterion\Visibility::VISIBLE)
+                    new Criterion\Visibility(Criterion\Visibility::VISIBLE),
                 ];
-                $locationQuery = new LocationQuery();
-                $locationQuery->filter = new Criterion\LogicalAnd($criteria);
-                $locationQuery->limit = 1;
-
-                $searchHits = $this->repository->getSearchService()->findLocations($locationQuery);
+                $searchHits = $this->repository->getSearchService()->findLocations(
+                    new LocationQuery(
+                        [
+                            'filter' => new Criterion\LogicalAnd($criteria),
+                            'limit' => 1,
+                        ]
+                    )
+                );
                 if ($searchHits->totalCount > 0) {
                     return (int) $searchHits->searchHits[0]->valueObject->id;
                 }
             } catch (Exception $exception) {
-
+                return null;
             }
-
         }
+
         return null;
     }
 }

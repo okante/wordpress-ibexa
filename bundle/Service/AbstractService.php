@@ -120,7 +120,7 @@ abstract class AbstractService implements ServiceInterface
             self::NAMESPACE
         );
         if (null === $perPage) {
-            $perPage = max(1, $this->getPerPage(static::ROOT));
+            $perPage = max(1, $this->getConfigurationField('per_page'));
         }
         $this->getOrderBy($options);
         $headers                      = $options['headers'] ?? [];
@@ -230,12 +230,13 @@ abstract class AbstractService implements ServiceInterface
      */
     public function createContent(WPObject $object, string $lang = 'eng-GB', bool $update = false): ?Content
     {
-        $values           = $this->configResolver->getParameter(static::ROOT, self::NAMESPACE);
+        $values           = $this->getConfigurationValues();
         $remoteId         = static::DATATYPE.'-'.$object->getWPObjectId();
         $parentLocationId = $values['parent_location'] ?? null;
 
         return $this->innerCreateContent($object, $values, $remoteId, $parentLocationId, $lang, $update);
     }
+
     public function getContentTypeIdentifier()
     {
         return $this->getConfigurationField('content_type');
@@ -293,8 +294,13 @@ abstract class AbstractService implements ServiceInterface
 
     private function getConfigurationField(string $field)
     {
-        $values           = $this->configResolver->getParameter(static::ROOT, self::NAMESPACE);
+        $values = $this->getConfigurationValues();
+
         return $values[$field] ?? null;
     }
 
+    private function getConfigurationValues(): array
+    {
+        return (array) $this->configResolver->getParameter(static::ROOT, self::NAMESPACE);
+    }
 }
