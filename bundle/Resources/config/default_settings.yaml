@@ -6,3 +6,4 @@ parameters:
   word_press_ibexa.categories: []
   word_press_ibexa.image: []
   word_press_ibexa.media: []
+  word_press_ibexa.default.webroot_dir: "%kernel.project_dir%/public"

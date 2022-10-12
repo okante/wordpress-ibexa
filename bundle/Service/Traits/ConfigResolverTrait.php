@@ -53,4 +53,11 @@ trait ConfigResolverTrait
     {
         return (int) $this->configResolver->getParameter('content.tree_root.location_id');
     }
+
+    private function getCurrentLang()
+    {
+        $langs = $this->configResolver->getParameter('languages');
+
+        return $langs[0] ?? 'eng-GB';
+    }
 }

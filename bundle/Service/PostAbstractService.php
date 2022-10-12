@@ -44,7 +44,7 @@ abstract class PostAbstractService extends AbstractService
      * @throws NotFoundException
      * @throws UnauthorizedException
      */
-    public function createContent(WPObject $object, string $lang = 'eng-GB', bool $update = true): ?Content
+    public function createContent(WPObject $object, bool $update = true): ?Content
     {
         if ($object instanceof Post) {
             $postId           = $object->getWPObjectId();
@@ -101,7 +101,7 @@ abstract class PostAbstractService extends AbstractService
                 }
             }
 
-            return $this->innerCreateContent($object, $values, $remoteId, $parentLocationId, $lang, $update);
+            return $this->innerCreateContent($object, $values, $remoteId, $parentLocationId, $update);
         }
 
         return null;

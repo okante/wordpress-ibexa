@@ -57,11 +57,10 @@ EOD;
         array $values,
         string $remoteId,
         $parentLocationId = null,
-        string $lang = 'eng-GB',
         bool $update = false
     ): ?Content {
         return $this->repository->sudo(
-            function () use ($object, $values, $remoteId, $parentLocationId, $lang, $update) {
+            function () use ($object, $values, $remoteId, $parentLocationId, $update) {
                 $contentType = $this->repository->getContentTypeService()
                                     ->loadContentTypeByIdentifier(
                                         $values['content_type'] ?? null
@@ -96,7 +95,7 @@ EOD;
                             $content->contentInfo
                         );
                         $contentUpdateStruct                      = $contentService->newContentUpdateStruct();
-                        $contentUpdateStruct->initialLanguageCode = $lang;
+                        $contentUpdateStruct->initialLanguageCode = $this->getCurrentLang();
                         $contentUpdateStruct->creatorId           = self::OWNER_ID;
 
                         $this->updateContentStruct($contentUpdateStruct, $fields);
@@ -108,7 +107,7 @@ EOD;
 
                         return $contentService->publishVersion($contentDraft->versionInfo);
                     } catch (NotFoundException $exception) {
-                        $contentCreateStruct           = $contentService->newContentCreateStruct($contentType, $lang);
+                        $contentCreateStruct           = $contentService->newContentCreateStruct($contentType, $this->getCurrentLang());
                         $contentCreateStruct->ownerId  = 14;
                         $contentCreateStruct->remoteId = $remoteId;
 
