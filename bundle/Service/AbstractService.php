@@ -47,10 +47,8 @@ abstract class AbstractService implements ServiceInterface
     protected StorageInterface $storage;
     protected ContentInterface $contentInterface;
 
-    public function __construct(
-        StorageInterface $storage,
-        ContentInterface $contentInterface
-    ) {
+    public function __construct(StorageInterface $storage, ContentInterface $contentInterface)
+    {
         $this->storage          = $storage;
         $this->contentInterface = $contentInterface;
     }
