@@ -6,7 +6,6 @@ services:
         public: true
         bind:
             $cachePool: '@ibexa.cache_pool'
-            $IOService: "@ibexa.field_type.ezimage.io_service.published"
 
     Almaviacx\Bundle\Ibexa\WordPress\Service\:
         resource: '../../Service'

@@ -21,9 +21,7 @@ use Ibexa\Contracts\Core\Repository\Exceptions\InvalidArgumentException;
 use Ibexa\Contracts\Core\Repository\Exceptions\NotFoundException;
 use Ibexa\Contracts\Core\Repository\Exceptions\UnauthorizedException;
 use Ibexa\Contracts\Core\Repository\Values\Content\Content;
-use Ibexa\Core\IO\IOServiceInterface;
 use RuntimeException;
-use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Request;
@@ -48,19 +46,13 @@ abstract class AbstractService implements ServiceInterface
     protected string $exceptionClass;
     protected StorageInterface $storage;
     protected ContentInterface $contentInterface;
-    protected IOServiceInterface $IOService;
-    protected Filesystem $filesystem;
 
     public function __construct(
         StorageInterface $storage,
-        ContentInterface $contentInterface,
-        IOServiceInterface $IOService,
-        Filesystem $filesystem
+        ContentInterface $contentInterface
     ) {
         $this->storage          = $storage;
         $this->contentInterface = $contentInterface;
-        $this->IOService        = $IOService;
-        $this->filesystem       = $filesystem;
     }
 
     /**
@@ -92,7 +84,6 @@ abstract class AbstractService implements ServiceInterface
         $page          = abs($page ?? 1);
         $postCount     = 0;
         $importedCount = 0;
-        $contents      = [];
         while (true) {
             $objects = $this->get($page, $perPage);
             if (0 === count($objects)) {
@@ -102,7 +93,7 @@ abstract class AbstractService implements ServiceInterface
             foreach ($objects as $object) {
                 /* @var WPObject $object */
                 try {
-                    $contents[] = $this->createContent($object);
+                    $this->createContent($object);
                     ++$importedCount;
                 } catch (\Exception $exception) {
                     $this->error(__METHOD__, ['e' => $exception, 'object' => $object]);
@@ -112,7 +103,7 @@ abstract class AbstractService implements ServiceInterface
             ++$page;
         }
         if (true === ($options['export-images'] ?? false)) {
-            $this->exportImages($contents);
+            $this->exportImages();
         }
         $this->storage->clearAll();
         $this->info('Total content:'.$postCount);
@@ -320,10 +311,10 @@ abstract class AbstractService implements ServiceInterface
         return (array) $this->configResolver->getParameter(static::ROOT, self::NAMESPACE);
     }
 
-    private function exportImages(array $contents): void
+    private function exportImages(): void
     {
         $dateTime   = new DateTime();
-        $folderName = 'exportimages_'.$dateTime->format('d-m-Y');
+        $folderName = 'exportimages_'.$dateTime->format('d-m-Y').'.zip';
         $this->zipDirectory($this->getLocalImageStorageDir(), $folderName);
     }
 
