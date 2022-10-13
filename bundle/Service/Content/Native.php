@@ -98,7 +98,7 @@ EOD;
                         $contentUpdateStruct->initialLanguageCode = $this->getCurrentLang();
                         $contentUpdateStruct->creatorId           = self::OWNER_ID;
 
-                        $this->updateContentStruct($contentUpdateStruct, $fields);
+                        $this->updateContentStruct($contentUpdateStruct, $fields, $remoteId);
 
                         $contentDraft = $contentService->updateContent(
                             $contentDraft->versionInfo,
@@ -107,11 +107,14 @@ EOD;
 
                         return $contentService->publishVersion($contentDraft->versionInfo);
                     } catch (NotFoundException $exception) {
-                        $contentCreateStruct           = $contentService->newContentCreateStruct($contentType, $this->getCurrentLang());
+                        $contentCreateStruct = $contentService->newContentCreateStruct(
+                            $contentType,
+                            $this->getCurrentLang()
+                        );
                         $contentCreateStruct->ownerId  = 14;
                         $contentCreateStruct->remoteId = $remoteId;
 
-                        $this->updateContentStruct($contentCreateStruct, $fields);
+                        $this->updateContentStruct($contentCreateStruct, $fields, $remoteId);
                         $locationCreateStruct = $locationService->newLocationCreateStruct($parentLocation->id);
 
                         $draft = $contentService->createContent($contentCreateStruct, [$locationCreateStruct]);
@@ -149,7 +152,7 @@ EOD;
         return $this->richTextType->fromHash($content);
     }
 
-    private function prepareImage(?string $url): string
+    private function prepareImage(?string $url, ?string $remoteId): string
     {
         if ('' === trim($url ?? '')) {
             return '';
@@ -163,12 +166,19 @@ EOD;
             if (200 !== $response->getStatusCode()) {
                 throw new \RuntimeException('Status code is not 200: '.$response->getStatusCode());
             }
-            $temporaryPath = '/tmp/'.pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_BASENAME);
+            $baseName      = pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_BASENAME);
+            $temporaryPath = '/tmp/'.$baseName;
             $fileHandler   = fopen($temporaryPath, 'w');
             foreach ($this->client->stream($response) as $chunk) {
                 fwrite($fileHandler, $chunk->getContent());
             }
             fclose($fileHandler);
+
+            $exportPath = $this->getLocalImageStorageDir();
+            if (!file_exists($exportPath)) {
+                mkdir($exportPath, 0777, true);
+            }
+            copy($temporaryPath, $exportPath.'/'.$remoteId.'__'.$baseName);
 
             return $temporaryPath;
         } catch (\Exception|ExceptionInterface $exception) {
@@ -176,7 +186,7 @@ EOD;
         }
     }
 
-    private function updateContentStruct(ContentStruct $contentStruct, $fieldSettings)
+    private function updateContentStruct(ContentStruct $contentStruct, $fieldSettings, string $remoteId)
     {
         foreach ($fieldSettings as $identifier => $fieldInfo) {
             $fieldValue = $fieldInfo['value'];
@@ -184,7 +194,7 @@ EOD;
                 $fieldValue = $this->prepareRichText($fieldValue);
             }
             if ('ezimage' === $fieldInfo['type']) {
-                $fieldValue = $this->prepareImage($fieldValue);
+                $fieldValue = $this->prepareImage($fieldValue, $remoteId);
             }
             if ('ezstring' === $fieldInfo['type']) {
                 $fieldValue = new TextLineValue($fieldValue);

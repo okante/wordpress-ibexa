@@ -2,7 +2,9 @@
 
 namespace Almaviacx\Bundle\Ibexa\WordPress\Service\Traits;
 
+use Almaviacx\Bundle\Ibexa\WordPress\DependencyInjection\Configuration;
 use Almaviacx\Bundle\Ibexa\WordPress\Exceptions\Exception;
+use DateTimeImmutable;
 use eZ\Publish\Core\MVC\ConfigResolverInterface;
 
 trait ConfigResolverTrait
@@ -59,5 +61,20 @@ trait ConfigResolverTrait
         $langs = $this->configResolver->getParameter('languages');
 
         return $langs[0] ?? 'eng-GB';
+    }
+
+    public function getImageRootDir(): string
+    {
+        return (string) $this->configResolver->getParameter('local_image_root_dir', Configuration::NAMESPACE);
+    }
+
+    public function getImageSubDir(): string
+    {
+        return (new DateTimeImmutable())->format('Y/m/d');
+    }
+
+    public function getLocalImageStorageDir(): string
+    {
+        return rtrim($this->getImageRootDir(), '/').'/'.$this->getImageSubDir();
     }
 }

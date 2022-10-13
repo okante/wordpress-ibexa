@@ -85,7 +85,7 @@ abstract class AbstractService implements ServiceInterface
         return $wpObjectContent;
     }
 
-    final public function import(?int $perPage = null, ?int $page = null): ArrayObject
+    final public function import(?int $perPage = null, ?int $page = null, ?array $options = null): ArrayObject
     {
         $this->storage->clearAll();
         $perPage       = $perPage > 0 ? $perPage : null;
@@ -111,7 +111,9 @@ abstract class AbstractService implements ServiceInterface
             $this->info('iteration:'.$page);
             ++$page;
         }
-        $this->exportImages($contents);
+        if (true === ($options['export-images'] ?? false)) {
+            $this->exportImages($contents);
+        }
         $this->storage->clearAll();
         $this->info('Total content:'.$postCount);
         $this->info('Imported content:'.$importedCount);
@@ -322,30 +324,7 @@ abstract class AbstractService implements ServiceInterface
     {
         $dateTime   = new DateTime();
         $folderName = 'exportimages_'.$dateTime->format('d-m-Y');
-        $folderPath = '/tmp/'.$folderName.'/';
-        /** @var Content $content */
-        foreach ($contents as $content) {
-            if ($content->getContentType()->identifier == static::DATATYPE) {
-                $imageContentId = $content->getFieldValue('media')->destinationContentId;
-                if ($imageContentId) {
-                    $imageContent = $this->repository->getContentService()->loadContent($imageContentId);
-                    $imageValue   = $imageContent->getFieldValue('image');
-                    $binaryFile   = $this->IOService->loadBinaryFile($imageValue->id);
-                    if (!$this->filesystem->exists($folderPath)) {
-                        $this->filesystem->mkdir($folderPath);
-                    }
-                    $temporaryPath = $folderPath.$imageContent->contentInfo->remoteId.
-                        '__'.$imageContent->getName().
-                        '.'.pathinfo($imageValue->fileName, PATHINFO_EXTENSION);
-                    $this->filesystem->copy(
-                        $this->configResolver->getParameter('webroot_dir', self::NAMESPACE).
-                        $binaryFile->uri,
-                        $temporaryPath
-                    );
-                }
-            }
-        }
-        $this->zipDirectory($folderPath, $folderName);
+        $this->zipDirectory($this->getLocalImageStorageDir(), $folderName);
     }
 
     private function zipDirectory($directory, $zipName): void
