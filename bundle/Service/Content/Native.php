@@ -167,18 +167,16 @@ EOD;
                 throw new \RuntimeException('Status code is not 200: '.$response->getStatusCode());
             }
             $baseName      = pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_BASENAME);
-            $temporaryPath = '/tmp/'.$baseName;
+            $exportPath = $this->getLocalImageStorageDir();
+            if (!file_exists($exportPath)) {
+                mkdir($exportPath, 0777, true);
+            }
+            $temporaryPath = $exportPath.'/'.$this->getImageName($remoteId, $baseName);
             $fileHandler   = fopen($temporaryPath, 'w');
             foreach ($this->client->stream($response) as $chunk) {
                 fwrite($fileHandler, $chunk->getContent());
             }
             fclose($fileHandler);
-
-            $exportPath = $this->getLocalImageStorageDir();
-            if (!file_exists($exportPath)) {
-                mkdir($exportPath, 0777, true);
-            }
-            copy($temporaryPath, $exportPath.'/'.$remoteId.'__'.$baseName);
 
             return $temporaryPath;
         } catch (\Exception|ExceptionInterface $exception) {

@@ -11,12 +11,22 @@ trait ConfigResolverTrait
 {
     protected ConfigResolverInterface $configResolver;
 
+    private string $dateTime;
+
     /**
      * @required
      */
     public function setConfigResolver(ConfigResolverInterface $configResolver)
     {
         $this->configResolver = $configResolver;
+    }
+
+    /**
+     * @required
+     */
+    public function setDateTime()
+    {
+        $this->dateTime = (new DateTimeImmutable())->format('Y/m/d');
     }
 
     /**
@@ -70,11 +80,21 @@ trait ConfigResolverTrait
 
     public function getImageSubDir(): string
     {
-        return (new DateTimeImmutable())->format('Y/m/d');
+        return $this->dateTime;
     }
 
     public function getLocalImageStorageDir(): string
     {
         return rtrim($this->getImageRootDir(), '/').'/'.$this->getImageSubDir();
+    }
+
+    public function getImageSeparator(): string
+    {
+        return (string) $this->configResolver->getParameter('image_separator', Configuration::NAMESPACE);
+    }
+
+    public function getImageName(string $remoteId, string $baseName): string
+    {
+        return $remoteId.$this->getImageSeparator().$baseName;
     }
 }
