@@ -26,7 +26,6 @@ interface ContentInterface
         array $values,
         string $remoteId,
         int $parentLocationId = null,
-        string $lang = 'eng-GB',
         bool $update = false
     ): ?Content;
 }

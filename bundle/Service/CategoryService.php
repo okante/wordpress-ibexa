@@ -17,7 +17,7 @@ final class CategoryService extends AbstractService
     protected string $objectClass    = Category::class;
     protected string $exceptionClass = CategoryNotFoundException::class;
 
-    public function createContent(WPObject $object, $lang = 'eng-GB', bool $update = false): ?Content
+    public function createContent(WPObject $object, bool $update = false): ?Content
     {
         if ($object instanceof Category) {
             $remoteId         = self::DATATYPE.'-'.$object->getWPObjectId();
@@ -28,7 +28,7 @@ final class CategoryService extends AbstractService
                 try {
                     $parentCategory = $this->getOne($object->parent);
                     if ($parentCategory) {
-                        $parentContent = $this->createContent($parentCategory, $lang, $update);
+                        $parentContent = $this->createContent($parentCategory, $update);
                         if ($parentContent) {
                             $parentLocationId = $parentContent->contentInfo->mainLocationId;
                         }
@@ -38,7 +38,7 @@ final class CategoryService extends AbstractService
                 }
             }
 
-            return $this->innerCreateContent($object, $values, $remoteId, $parentLocationId, $lang, $update);
+            return $this->innerCreateContent($object, $values, $remoteId, $parentLocationId, $update);
         }
 
         return null;

@@ -34,6 +34,12 @@ class ImportCommand extends Command
                 InputOption::VALUE_OPTIONAL,
                 'page'
             )
+            ->addOption(
+                'export-images',
+                null,
+                InputOption::VALUE_NONE,
+                'page'
+            )
             ->setDescription('Import Blog content to ibexa');
     }
 
@@ -44,7 +50,7 @@ class ImportCommand extends Command
         $perPage = $perPage > 0 ? $perPage : null;
         $page    = (int) $input->getOption('page');
         $page    = $page > 0 ? $page : null;
-        $count   = $this->service->import($perPage, $page);
+        $count   = $this->service->import($perPage, $page, $input->getOptions());
         $io->info('content imported => (success:'.($count->success ?? '').',total:'.($count->total ?? '').')');
         $io->success('Done');
 

@@ -110,8 +110,8 @@ class Post extends WPObject
         $this->authorContentInfo = $authorContentInfo;
     }
 
-    public function setImageContent(ContentInfo $authorContentInfo)
+    public function setImageContent(ContentInfo $imageContentInfo)
     {
-        $this->imageContentInfo = $authorContentInfo;
+        $this->imageContentInfo = $imageContentInfo;
     }
 }

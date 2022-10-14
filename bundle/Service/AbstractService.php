@@ -13,6 +13,7 @@ use Almaviacx\Bundle\Ibexa\WordPress\Service\Traits\LoggerTrait;
 use Almaviacx\Bundle\Ibexa\WordPress\ValueObject\OrderBy;
 use Almaviacx\Bundle\Ibexa\WordPress\ValueObject\WPObject;
 use ArrayObject;
+use DateTime;
 use Ibexa\Contracts\Core\Repository\Exceptions\BadStateException;
 use Ibexa\Contracts\Core\Repository\Exceptions\ContentFieldValidationException;
 use Ibexa\Contracts\Core\Repository\Exceptions\ContentValidationException;
@@ -21,8 +22,11 @@ use Ibexa\Contracts\Core\Repository\Exceptions\NotFoundException;
 use Ibexa\Contracts\Core\Repository\Exceptions\UnauthorizedException;
 use Ibexa\Contracts\Core\Repository\Values\Content\Content;
 use RuntimeException;
+use Symfony\Component\Finder\Finder;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Contracts\HttpClient\Exception\ExceptionInterface;
+use ZipArchive;
 
 abstract class AbstractService implements ServiceInterface
 {
@@ -57,13 +61,13 @@ abstract class AbstractService implements ServiceInterface
      * @throws UnauthorizedException
      * @throws InvalidArgumentException
      */
-    public function createAsSubObject(int $objectId, string $lang = 'eng-GB', bool $update = true): Content
+    public function createAsSubObject(int $objectId, bool $update = true): Content
     {
         $wpObject = $this->getOne($objectId);
         if (null === $wpObject) {
             throw new RuntimeException('Cannot find '.static::DATATYPE.' Id '.$objectId);
         }
-        $wpObjectContent = $this->createContent($wpObject, $lang, $update);
+        $wpObjectContent = $this->createContent($wpObject, $update);
         if (null === $wpObjectContent) {
             throw new RuntimeException('Cannot create '.static::DATATYPE.' Id '.$objectId);
         }
@@ -71,7 +75,7 @@ abstract class AbstractService implements ServiceInterface
         return $wpObjectContent;
     }
 
-    final public function import(?int $perPage = null, ?int $page = null): ArrayObject
+    final public function import(?int $perPage = null, ?int $page = null, ?array $options = null): ArrayObject
     {
         $this->storage->clearAll();
         $perPage       = $perPage > 0 ? $perPage : null;
@@ -95,6 +99,9 @@ abstract class AbstractService implements ServiceInterface
             }
             $this->info('iteration:'.$page);
             ++$page;
+        }
+        if (true === ($options['export-images'] ?? false)) {
+            $this->exportImages();
         }
         $this->storage->clearAll();
         $this->info('Total content:'.$postCount);
@@ -228,13 +235,13 @@ abstract class AbstractService implements ServiceInterface
      * @throws UnauthorizedException
      * @throws InvalidArgumentException
      */
-    public function createContent(WPObject $object, string $lang = 'eng-GB', bool $update = false): ?Content
+    public function createContent(WPObject $object, bool $update = false): ?Content
     {
         $values           = $this->getConfigurationValues();
         $remoteId         = static::DATATYPE.'-'.$object->getWPObjectId();
         $parentLocationId = $values['parent_location'] ?? null;
 
-        return $this->innerCreateContent($object, $values, $remoteId, $parentLocationId, $lang, $update);
+        return $this->innerCreateContent($object, $values, $remoteId, $parentLocationId, $update);
     }
 
     public function getContentTypeIdentifier()
@@ -260,7 +267,6 @@ abstract class AbstractService implements ServiceInterface
         array $values,
         string $remoteId,
         int $parentLocationId,
-        string $lang = 'eng-GB',
         bool $update = false
     ): ?Content {
         $content = $this->contentInterface->createContent(
@@ -268,7 +274,6 @@ abstract class AbstractService implements ServiceInterface
             $values,
             $remoteId,
             $parentLocationId,
-            $lang,
             $update
         );
         if ($content) {
@@ -302,5 +307,33 @@ abstract class AbstractService implements ServiceInterface
     private function getConfigurationValues(): array
     {
         return (array) $this->configResolver->getParameter(static::ROOT, self::NAMESPACE);
+    }
+
+    private function exportImages(): void
+    {
+        $dateTime   = new DateTime();
+        $folderName = 'exportimages_'.$dateTime->format('d-m-Y').'.zip';
+        $this->zipDirectory($this->getLocalImageStorageDir(), $folderName);
+    }
+
+    private function zipDirectory($directory, $zipName): void
+    {
+        try {
+            $zip    = new ZipArchive();
+            $finder = new Finder();
+            if (true !== $zip->open($zipName, \ZipArchive::CREATE)) {
+                throw new FileException('Zip file could not be created/opened.');
+            }
+            $finder->files()->in($directory);
+            foreach ($finder as $file) {
+                $zip->addFile($file->getRealpath(), basename($file->getRealpath()));
+            }
+            if (!$zip->close()) {
+                throw new FileException('Zip file could not be closed.');
+            }
+            $this->info('Zip '.$zipName.' created');
+        } catch (\Exception $exception) {
+            $this->error(__METHOD__, ['e' => $exception]);
+        }
     }
 }
