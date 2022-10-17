@@ -312,7 +312,7 @@ abstract class AbstractService implements ServiceInterface
     private function exportImages(): void
     {
         $dateTime   = new DateTime();
-        $folderName = 'exportimages_'.$dateTime->format('d-m-Y').'.zip';
+        $folderName = '/tmp/exportimages_'.$dateTime->format('d-m-Y').'.zip';
         $this->zipDirectory($this->getLocalImageStorageDir(), $folderName);
     }
 
