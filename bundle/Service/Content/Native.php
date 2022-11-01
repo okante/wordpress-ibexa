@@ -7,6 +7,7 @@ use Almaviacx\Bundle\Ibexa\WordPress\Service\ContentInterface;
 use Almaviacx\Bundle\Ibexa\WordPress\Service\Traits\ConfigResolverTrait;
 use Almaviacx\Bundle\Ibexa\WordPress\Service\Traits\HttpClientTrait;
 use Almaviacx\Bundle\Ibexa\WordPress\Service\Traits\IbexaRepositoryTrait;
+use Almaviacx\Bundle\Ibexa\WordPress\Service\Traits\LoggerTrait;
 use Almaviacx\Bundle\Ibexa\WordPress\ValueObject\WPObject;
 use Exception;
 use Ibexa\Contracts\Core\Repository\Exceptions\BadStateException;
@@ -28,6 +29,7 @@ class Native implements ContentInterface
     use ConfigResolverTrait;
     use IbexaRepositoryTrait;
     use HttpClientTrait;
+    use LoggerTrait;
 
     private RichTextType $richTextType;
 
@@ -107,19 +109,23 @@ EOD;
 
                         return $contentService->publishVersion($contentDraft->versionInfo);
                     } catch (NotFoundException $exception) {
-                        $contentCreateStruct = $contentService->newContentCreateStruct(
-                            $contentType,
-                            $this->getCurrentLang()
-                        );
-                        $contentCreateStruct->ownerId  = 14;
-                        $contentCreateStruct->remoteId = $remoteId;
+                        try {
+                            $contentCreateStruct = $contentService->newContentCreateStruct(
+                                $contentType,
+                                $this->getCurrentLang()
+                            );
+                            $contentCreateStruct->ownerId  = 14;
+                            $contentCreateStruct->remoteId = $remoteId;
 
-                        $this->updateContentStruct($contentCreateStruct, $fields, $remoteId);
-                        $locationCreateStruct = $locationService->newLocationCreateStruct($parentLocation->id);
+                            $this->updateContentStruct($contentCreateStruct, $fields, $remoteId);
+                            $locationCreateStruct = $locationService->newLocationCreateStruct($parentLocation->id);
 
-                        $draft = $contentService->createContent($contentCreateStruct, [$locationCreateStruct]);
+                            $draft = $contentService->createContent($contentCreateStruct, [$locationCreateStruct]);
 
-                        return $contentService->publishVersion($draft->versionInfo);
+                            return $contentService->publishVersion($draft->versionInfo);
+                        } catch (Exception $exception) {
+                            $this->error(__METHOD__, ['e' => $exception]);
+                        }
                     }
                 }
 
@@ -136,6 +142,9 @@ EOD;
         if (strip_tags($inputText) === $inputText) {
             $inputText = "<p>$inputText</p>";
         }
+        // Remove Extra code like "[et_pb_section fb_built=&#8221;1&#8243;][ ..."
+        $inputText = preg_replace('/\[[^\]]*\]/', '', $inputText);
+
         if (extension_loaded('tidy')) {
             $tidyConfig = [
                 'show-body-only' => true,
@@ -146,10 +155,36 @@ EOD;
 
             $inputText = str_replace(["\r\n", "\r", "\n"], '', $inputText->root()->value);
         }
-
         $content = ['xml' => self::RICHTEXT_EDIT_PREFIX.$inputText.self::RICHTEXT_EDIT_SUFFIX];
+        $fieldValue = $this->richTextType->fromHash($content);
 
-        return $this->richTextType->fromHash($content);
+        return $this->filterValue($fieldValue);
+    }
+
+    private function filterValue(RichTextValue $fieldValue): RichTextValue
+    {
+        $doc = new \DOMDocument('1.0', 'UTF-8');
+        $doc->xmlVersion = '1.0';
+        $doc->encoding = 'UTF-8';
+        $doc->loadXML($fieldValue);
+        $section = $doc->firstChild;
+        $length = count($section->childNodes);
+        foreach ($section->childNodes as $key => $childNode) {
+//            if (property_exists($childNode, 'data') && strip_tags($childNode->data) === $childNode->data) {
+//                $childNode->nodeValue = '<para>'.$childNode->data.'</para>';
+//            }
+            if ($key == 0) {
+                $childNode->nodeValue = '<para>'.$childNode->data;
+            }
+            if ($length-1 == $key) {
+                $childNode->nodeValue = $childNode->data.'</para>';
+            }
+        }
+        $data = $doc->saveXML();
+        $data = str_replace('&lt;', '<', $data);
+        $data = str_replace('&gt;', '>', $data);
+
+        return new RichTextValue($data);
     }
 
     private function prepareImage(?string $url, ?string $remoteId): string
